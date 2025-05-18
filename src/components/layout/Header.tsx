@@ -10,6 +10,8 @@ const Header = () => {
     { name: 'Home', href: '#' },
     { name: 'Products', href: '#products' },
     { name: 'How It Works', href: '#how-it-works' },
+    { name: 'About Us', href: '#about-us' },
+    { name: 'FAQ', href: '#faq' },
     { name: 'Contact', href: '#contact' },
   ];
 
@@ -69,4 +71,3 @@ const Header = () => {
 };
 
 export default Header;
-

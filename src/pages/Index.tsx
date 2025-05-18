@@ -5,6 +5,8 @@ import Footer from '@/components/layout/Footer';
 import Hero from '@/components/home/Hero';
 import ProductShowcase from '@/components/home/ProductShowcase';
 import HowItWorks from '@/components/home/HowItWorks';
+import AboutUs from '@/components/home/AboutUs';
+import FaqSection from '@/components/home/FaqSection';
 
 const Index = () => {
   return (
@@ -14,7 +16,9 @@ const Index = () => {
         <Hero />
         <ProductShowcase />
         <HowItWorks />
-        {/* Placeholder for other sections like Testimonials, About Us, etc. */}
+        <AboutUs />
+        <FaqSection />
+        {/* Placeholder for other sections like Testimonials, etc. */}
       </main>
       <Footer />
     </div>
@@ -22,4 +26,3 @@ const Index = () => {
 };
 
 export default Index;
-
