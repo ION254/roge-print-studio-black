@@ -5,11 +5,10 @@ import { Button } from '@/components/ui/button';
 const Hero = () => {
   return (
     <div className="relative bg-gray-800 text-white min-h-[70vh] flex items-center justify-center">
-      {/* Placeholder for background image/video. Current: dark gray solid color */}
-      {/* You can replace this div with an img tag or a video element */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center opacity-40" 
-        style={{ backgroundImage: "url('https://placehold.co/1920x1080/212121/e0e0e0?text=Your+Awesome+Designs')" }}
+      {/* Background image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center opacity-40"
+        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80')" }}
       ></div>
       <div className="relative z-10 text-center p-8">
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
@@ -27,4 +26,3 @@ const Hero = () => {
 };
 
 export default Hero;
-
