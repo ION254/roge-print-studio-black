@@ -1,6 +1,5 @@
-
 import React, { useEffect, useRef, useState } from 'react';
-import { Canvas as FabricCanvas, Circle, Rect,Textbox, util } from 'fabric';
+import { Canvas as FabricCanvas, Circle, Rect, Textbox, util, Image as FabricImage } from 'fabric';
 import { Toolbar, ActiveTool } from './Toolbar';
 import { ColorPicker } from './ColorPicker';
 import { toast } from 'sonner';
@@ -145,30 +144,29 @@ export const DesignCanvas: React.FC = () => {
 
     reader.onload = (f) => {
       const data = f.target?.result as string;
-      util.loadImage(data, (img) => {
-        if (img) {
-           const fabricImage = new util.enlivenObjects([img],function(arg0: object[]): void {  })[0];
-          fabricImage.set({
-            left: 100,
-            top: 100,
-            scaleX: 0.5, // Initial scale, adjust as needed
-            scaleY: 0.5,
-            hasControls: true,
-            hasBorders: true,
-          });
-          fabricCanvas.add(fabricImage);
-          fabricCanvas.setActiveObject(fabricImage);
-          fabricCanvas.renderAll();
-          toast.success("Image added to canvas!");
-        } else {
-            toast.error("Could not load image.");
-        }
+      if (!data) return;
+
+      // Fix: Use proper fabric.js API for creating images
+      FabricImage.fromURL(data, (img) => {
+        img.set({
+          left: 100,
+          top: 100,
+          scaleX: 0.5,
+          scaleY: 0.5,
+          hasControls: true,
+          hasBorders: true,
+        });
+        fabricCanvas.add(img);
+        fabricCanvas.setActiveObject(img);
+        fabricCanvas.renderAll();
+        toast.success("Image added to canvas!");
+      }, {
+        crossOrigin: 'anonymous'
       });
     };
     reader.readAsDataURL(file);
     event.target.value = ''; // Reset file input
   };
-
 
   const handleClear = () => {
     if (!fabricCanvas) return;
