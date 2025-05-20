@@ -8,42 +8,68 @@ import { useCanvasDrawing } from '@/hooks/useCanvasDrawing';
 import { useCanvasShapes } from '@/hooks/useCanvasShapes';
 import { useCanvasText } from '@/hooks/useCanvasText';
 import { useCanvasImage } from '@/hooks/useCanvasImage';
+import { toast } from 'sonner'; // For placeholder notifications
 
 export const DesignCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [activeColor, setActiveColor] = useState<string>('#000000');
   const [activeTool, setActiveTool] = useState<ActiveTool>('select');
   
-  // Use our custom hooks
   const { fabricCanvas, initCanvas } = useDesignCanvas();
   const { addShape } = useCanvasShapes(fabricCanvas);
   const { addText } = useCanvasText(fabricCanvas);
   const { handleImageUpload } = useCanvasImage(fabricCanvas);
   
-  // Initialize canvas on mount
   useEffect(() => {
     const cleanup = initCanvas(canvasRef);
     return cleanup;
-  }, []); // Empty dependency array: run once on mount
+  }, [initCanvas]); // initCanvas added to dependency array as it's a function from a hook
   
-  // Set up drawing mode based on active tool and color
   useCanvasDrawing(
     fabricCanvas, 
     activeTool === 'draw', 
     activeColor
   );
 
-  const handleToolClick = (tool: ActiveTool) => {
+  const handleToolClick = (tool: Extract<ActiveTool, 'select' | 'draw' | 'rectangle' | 'circle'>) => {
     setActiveTool(tool);
-    
-    if (tool === 'rectangle' || tool === 'circle') {
+    if (fabricCanvas && (tool === 'rectangle' || tool === 'circle')) {
       addShape(tool, activeColor);
     }
   };
 
   const handleAddText = () => {
     setActiveTool('text');
-    addText(activeColor);
+    if (fabricCanvas) {
+      addText(activeColor);
+    }
+  };
+
+  const handleOpenShapeLibrary = () => {
+    setActiveTool('shape-library');
+    // Placeholder for opening shape library
+    toast.info("Shape Library opened (placeholder functionality).");
+    console.log("Shape Library tool activated. Color:", activeColor);
+  };
+
+  const handleOpenSuggestedDesigns = () => {
+    setActiveTool('suggested-designs');
+    // Placeholder for opening suggested designs
+    toast.info("Suggested Designs opened (placeholder functionality).");
+    console.log("Suggested Designs tool activated. Color:", activeColor);
+  };
+
+  const handleClearCanvas = () => {
+    if (fabricCanvas) {
+      fabricCanvas.clear();
+      // fabricCanvas.backgroundColor = '#ffffff'; // This might be handled by useDesignCanvas or if not, ensure it is reset
+      // Re-initialize background if cleared completely by fabricCanvas.clear()
+      if (fabricCanvas.backgroundColor !== '#ffffff') {
+         fabricCanvas.backgroundColor = '#ffffff';
+      }
+      fabricCanvas.renderAll();
+      toast.info("Canvas cleared!");
+    }
   };
 
   return (
@@ -51,16 +77,12 @@ export const DesignCanvas: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-4 p-2 border-b border-border">
         <Toolbar 
           activeTool={activeTool} 
-          onToolClick={handleToolClick} 
-          onClear={() => {
-            if (fabricCanvas) {
-              fabricCanvas.clear();
-              fabricCanvas.backgroundColor = '#ffffff';
-              fabricCanvas.renderAll();
-            }
-          }}
+          onToolClick={handleToolClick}
           onAddText={handleAddText}
+          onClear={handleClearCanvas}
           onImageUpload={handleImageUpload}
+          onOpenShapeLibrary={handleOpenShapeLibrary}
+          onOpenSuggestedDesigns={handleOpenSuggestedDesigns}
         />
         <ColorPicker color={activeColor} onChange={setActiveColor} />
       </div>
@@ -68,6 +90,7 @@ export const DesignCanvas: React.FC = () => {
         <canvas ref={canvasRef} />
       </div>
       <div className="mt-4 text-center">
+        {/* Pass fabricCanvas if CanvasActions needs it, or specific actions if refactored further */}
         <CanvasActions fabricCanvas={fabricCanvas} />
       </div>
     </div>
