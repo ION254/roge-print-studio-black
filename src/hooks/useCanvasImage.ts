@@ -1,11 +1,10 @@
-import { Canvas as FabricCanvas, Image as FabricImage } from 'fabric';
+import { Canvas as FabricCanvas, Image as FabricImage, TCrossOrigin } from 'fabric';
 import { toast } from 'sonner';
 
-// Fabric.js type for image loading options might be IImageOptions or a similar name.
-// For the purpose of this fix, we'll assume the structure is { crossOrigin: string }.
-// If LoadImageOptions is a specific importable type, that would be more robust.
+// Fabric.js type for image loading options.
+// TCrossOrigin is imported from fabric for type safety.
 interface LoadImageOptions {
-  crossOrigin?: string;
+  crossOrigin?: TCrossOrigin;
   // other options can be added here if known
 }
 
@@ -21,6 +20,7 @@ export const useCanvasImage = (fabricCanvas: FabricCanvas | null) => {
       if (!data) return;
 
       // Options object passed as the second argument
+      // The value 'anonymous' is a valid TCrossOrigin type.
       const imageOptions: LoadImageOptions = { crossOrigin: 'anonymous' };
 
       // Callback function passed as the third argument
