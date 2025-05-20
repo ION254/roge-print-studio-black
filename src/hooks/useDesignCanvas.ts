@@ -1,7 +1,7 @@
 
 import { useEffect, useState, RefObject } from 'react';
 import { Canvas as FabricCanvas } from 'fabric';
-// Removed unused import of toast from 'sonner'
+import { toast } from 'sonner';
 
 export type FabricCanvasHook = {
   fabricCanvas: FabricCanvas | null;
@@ -24,7 +24,7 @@ export const useDesignCanvas = (): FabricCanvasHook => {
     });
     
     setFabricCanvas(canvas);
-    // Removed toast.success("Canvas ready! Let's get creative.");
+    toast.success("Canvas ready! Let's get creative.");
 
     // Handle window resize to make canvas responsive
     const handleResize = () => {
@@ -61,4 +61,3 @@ export const useDesignCanvas = (): FabricCanvasHook => {
     initCanvas
   };
 };
-
