@@ -2,7 +2,7 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { View3d } from 'lucide-react';
+import { View } from 'lucide-react'; // Changed from View3d to View
 
 interface ThreeDViewProps {
   canvasData?: string; // This would be the serialized canvas data
@@ -13,7 +13,7 @@ export const ThreeDView: React.FC<ThreeDViewProps> = ({ canvasData }) => {
     <Dialog>
       <DialogTrigger asChild>
         <Button variant="outline" className="gap-2">
-          <View3d className="h-4 w-4" />
+          <View className="h-4 w-4" /> {/* Changed from View3d to View */}
           3D Preview
         </Button>
       </DialogTrigger>
@@ -31,3 +31,4 @@ export const ThreeDView: React.FC<ThreeDViewProps> = ({ canvasData }) => {
     </Dialog>
   );
 };
+

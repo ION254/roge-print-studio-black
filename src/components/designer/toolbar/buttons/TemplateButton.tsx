@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Templates as TemplatesIcon } from 'lucide-react';
+import { LayoutGrid as LayoutGridIcon } from 'lucide-react'; // Changed from Templates to LayoutGrid
 
 interface TemplateButtonProps {
   onClick: () => void;
@@ -18,7 +18,7 @@ export const TemplateButton: React.FC<TemplateButtonProps> = ({ onClick }) => {
           onClick={onClick}
           aria-label="Templates"
         >
-          <TemplatesIcon className="h-5 w-5" />
+          <LayoutGridIcon className="h-5 w-5" /> {/* Changed from TemplatesIcon */}
         </Button>
       </TooltipTrigger>
       <TooltipContent>
@@ -27,3 +27,4 @@ export const TemplateButton: React.FC<TemplateButtonProps> = ({ onClick }) => {
     </Tooltip>
   );
 };
+
