@@ -1,14 +1,14 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Menu } from 'lucide-react';
+import { Menu, User } from 'lucide-react'; // Import User icon
 import { Link } from 'react-router-dom';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
   const navItems = [
-    { name: 'Home', href: '#' },
+    { name: 'Home', href: '/' }, // Changed from '#' to '/'
     { name: 'Products', href: '#products' },
     { name: 'How It Works', href: '#how-it-works' },
     { name: 'About Us', href: '#about-us' },
@@ -30,14 +30,30 @@ const Header = () => {
               <a
                 key={item.name}
                 href={item.href}
+                onClick={(e) => {
+                  if (item.href.startsWith('/')) {
+                    // Let Link handle navigation for internal routes
+                  } else if (item.href.startsWith('#')) {
+                    e.preventDefault();
+                    const element = document.querySelector(item.href);
+                    if (element) {
+                      element.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }
+                }}
                 className="text-foreground hover:text-primary transition-colors duration-200"
               >
-                {item.name}
+                {item.href.startsWith('/') ? <Link to={item.href}>{item.name}</Link> : item.name}
               </a>
             ))}
           </nav>
-          <div className="hidden md:block">
+          <div className="hidden md:flex items-center space-x-2">
             <Button>Get a Quote</Button>
+            <Button variant="ghost" size="icon" asChild>
+              <Link to="/profile" aria-label="Profile">
+                <User className="h-6 w-6" />
+              </Link>
+            </Button>
           </div>
           <div className="md:hidden">
             <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
@@ -55,12 +71,30 @@ const Header = () => {
               <a
                 key={item.name}
                 href={item.href}
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={(e) => {
+                  setIsMobileMenuOpen(false);
+                  if (item.href.startsWith('/')) {
+                    // Let Link handle navigation
+                  } else if (item.href.startsWith('#')) {
+                    e.preventDefault();
+                    const element = document.querySelector(item.href);
+                    if (element) {
+                      element.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }
+                }}
                 className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-muted hover:text-primary"
               >
-                {item.name}
+                 {item.href.startsWith('/') ? <Link to={item.href}>{item.name}</Link> : item.name}
               </a>
             ))}
+             <Link
+              to="/profile"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-muted hover:text-primary"
+            >
+              Profile
+            </Link>
           </nav>
           <div className="pt-2 pb-3 px-4">
             <Button className="w-full">Get a Quote</Button>

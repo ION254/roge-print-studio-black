@@ -8,9 +8,9 @@ import { useCanvasDrawing } from '@/hooks/useCanvasDrawing';
 import { useCanvasShapes } from '@/hooks/useCanvasShapes';
 import { useCanvasText } from '@/hooks/useCanvasText';
 import { useCanvasImage } from '@/hooks/useCanvasImage';
-import { useTemplates } from '@/hooks/useTemplates'; // Import the template hook
-import { Templates } from './Templates'; // Import the Templates component
-import { ThreeDView } from './ThreeDView'; // Import the 3D view component
+import { useTemplates } from '@/hooks/useTemplates';
+import { Templates } from './Templates';
+import { ThreeDView } from './ThreeDView';
 import { toast } from 'sonner';
 
 export const DesignCanvas: React.FC = () => {
@@ -26,8 +26,15 @@ export const DesignCanvas: React.FC = () => {
   
   useEffect(() => {
     const cleanup = initCanvas(canvasRef);
-    return cleanup;
-  }, [initCanvas]);
+    // Open templates drawer on initial load
+    setIsTemplateDrawerOpen(true);
+    return () => {
+      if (cleanup) {
+        cleanup();
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initCanvas]); // setIsTemplateDrawerOpen is stable
   
   useCanvasDrawing(
     fabricCanvas, 
@@ -87,7 +94,7 @@ export const DesignCanvas: React.FC = () => {
           onImageUpload={handleImageUpload}
           onOpenShapeLibrary={handleOpenShapeLibrary}
           onOpenSuggestedDesigns={handleOpenSuggestedDesigns}
-          onOpenTemplates={handleOpenTemplates} // Add handler for templates button
+          onOpenTemplates={handleOpenTemplates}
         />
         <ColorPicker color={activeColor} onChange={setActiveColor} />
       </div>
@@ -99,7 +106,6 @@ export const DesignCanvas: React.FC = () => {
         <CanvasActions fabricCanvas={fabricCanvas} />
       </div>
 
-      {/* Templates Drawer */}
       <Templates 
         open={isTemplateDrawerOpen}
         onOpenChange={setIsTemplateDrawerOpen}
