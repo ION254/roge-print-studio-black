@@ -1,19 +1,19 @@
 
-import { RefObject, useState } from 'react';
+import { RefObject, useState, useCallback } from 'react'; // Added useCallback
 import { Canvas as FabricCanvas } from 'fabric';
 
 export type FabricCanvasHook = {
   fabricCanvas: FabricCanvas | null;
-  initCanvas: (canvasRef: RefObject<HTMLCanvasElement>) => (() => void) | undefined; // Updated return type
+  initCanvas: (canvasRef: RefObject<HTMLCanvasElement>) => (() => void) | undefined;
 };
 
 export const useDesignCanvas = (): FabricCanvasHook => {
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
 
-  const initCanvas = (canvasRef: RefObject<HTMLCanvasElement>): (() => void) | undefined => {
+  const initCanvas = useCallback((canvasRef: RefObject<HTMLCanvasElement>): (() => void) | undefined => {
     if (!canvasRef.current) {
       console.warn("Canvas ref not available during initCanvas.");
-      return undefined; // Explicitly return undefined if canvas ref is not current
+      return undefined; 
     }
 
     const canvasInstance = new FabricCanvas(canvasRef.current, {
@@ -50,16 +50,15 @@ export const useDesignCanvas = (): FabricCanvasHook => {
     
     return () => {
       window.removeEventListener('resize', handleResize);
-      // Ensure canvasInstance exists and is not already disposed before calling dispose
       if (canvasInstance && !canvasInstance.disposed) {
         canvasInstance.dispose();
       }
     };
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // setFabricCanvas is stable, so empty dependency array is fine.
 
   return {
     fabricCanvas,
     initCanvas
   };
 };
-
