@@ -3,6 +3,7 @@ import React from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Hero from '@/components/home/Hero';
+import RotatingImageShowcase from '@/components/home/RotatingImageShowcase'; // Import new component
 import ProductShowcase from '@/components/home/ProductShowcase';
 import HowItWorks from '@/components/home/HowItWorks';
 import AboutUs from '@/components/home/AboutUs';
@@ -14,6 +15,7 @@ const Index = () => {
       <Header />
       <main className="flex-grow">
         <Hero />
+        <RotatingImageShowcase /> {/* Add new component here */}
         <ProductShowcase />
         <HowItWorks />
         <AboutUs />

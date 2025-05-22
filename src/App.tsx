@@ -7,7 +7,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import DesignerPage from "./pages/DesignerPage";
-import ProfilePage from "./pages/ProfilePage"; // Import the new ProfilePage
+import ProfilePage from "./pages/ProfilePage";
+import CollectionPage from "./pages/CollectionPage"; // Import the new CollectionPage
 
 const queryClient = new QueryClient();
 
@@ -20,7 +21,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/designer" element={<DesignerPage />} />
-          <Route path="/profile" element={<ProfilePage />} /> {/* Add route for ProfilePage */}
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/collection" element={<CollectionPage />} /> {/* Add route for CollectionPage */}
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

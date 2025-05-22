@@ -21,11 +21,11 @@ export const Templates: React.FC<TemplatesProps> = ({
 }) => {
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[60vh] flex flex-col"> {/* Adjusted height and added flex */}
-        <DrawerHeader className="text-left flex-shrink-0"> {/* Ensure header doesn't shrink */}
+      <DrawerContent className="max-h-[50vh] flex flex-col"> {/* Adjusted height to 50vh */}
+        <DrawerHeader className="text-left flex-shrink-0">
           <DrawerTitle className="text-2xl">Templates</DrawerTitle>
         </DrawerHeader>
-        <ScrollArea className="flex-1 overflow-y-auto px-4"> {/* Adjusted to be flexible and scrollable */}
+        <ScrollArea className="flex-1 overflow-y-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-8">
             {templates.map((template) => (
               <Card key={template.id} className="overflow-hidden">
