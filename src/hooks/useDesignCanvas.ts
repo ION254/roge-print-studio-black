@@ -1,20 +1,22 @@
 
-import { useEffect, useState, RefObject } from 'react';
+import { RefObject, useState } from 'react';
 import { Canvas as FabricCanvas } from 'fabric';
-// Removed unused import of toast from 'sonner'
 
 export type FabricCanvasHook = {
   fabricCanvas: FabricCanvas | null;
-  initCanvas: (canvasRef: RefObject<HTMLCanvasElement>) => void;
+  initCanvas: (canvasRef: RefObject<HTMLCanvasElement>) => (() => void) | undefined; // Updated return type
 };
 
 export const useDesignCanvas = (): FabricCanvasHook => {
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
 
-  const initCanvas = (canvasRef: RefObject<HTMLCanvasElement>) => {
-    if (!canvasRef.current) return;
+  const initCanvas = (canvasRef: RefObject<HTMLCanvasElement>): (() => void) | undefined => {
+    if (!canvasRef.current) {
+      console.warn("Canvas ref not available during initCanvas.");
+      return undefined; // Explicitly return undefined if canvas ref is not current
+    }
 
-    const canvas = new FabricCanvas(canvasRef.current, {
+    const canvasInstance = new FabricCanvas(canvasRef.current, {
       width: 800,
       height: 600,
       backgroundColor: '#ffffff',
@@ -23,36 +25,35 @@ export const useDesignCanvas = (): FabricCanvasHook => {
       preserveObjectStacking: true,
     });
     
-    setFabricCanvas(canvas);
-    // Removed toast.success("Canvas ready! Let's get creative.");
+    setFabricCanvas(canvasInstance);
 
-    // Handle window resize to make canvas responsive
     const handleResize = () => {
       const container = canvasRef.current?.parentElement;
-      if (container && canvas) {
-        canvas.setDimensions({
+      if (container && canvasInstance) {
+        canvasInstance.setDimensions({
           width: container.clientWidth,
           height: container.clientHeight > 300 ? container.clientHeight : 600
         });
-        canvas.renderAll();
+        canvasInstance.renderAll();
       }
     };
 
-    // Initial resize
     const parentElement = canvasRef.current?.parentElement;
     if (parentElement) {
         const initialWidth = parentElement.clientWidth > 50 ? parentElement.clientWidth - 40 : 760;
         const initialHeight = 600;
-        canvas.setDimensions({ width: initialWidth, height: initialHeight});
-        canvas.renderAll();
+        canvasInstance.setDimensions({ width: initialWidth, height: initialHeight});
+        canvasInstance.renderAll();
     }
 
     window.addEventListener('resize', handleResize);
     
-    // Return cleanup function
     return () => {
       window.removeEventListener('resize', handleResize);
-      canvas.dispose();
+      // Ensure canvasInstance exists and is not already disposed before calling dispose
+      if (canvasInstance && !canvasInstance.disposed) {
+        canvasInstance.dispose();
+      }
     };
   };
 

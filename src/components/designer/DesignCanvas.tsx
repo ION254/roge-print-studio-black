@@ -29,12 +29,12 @@ export const DesignCanvas: React.FC = () => {
     // Open templates drawer on initial load
     setIsTemplateDrawerOpen(true);
     return () => {
-      if (cleanup) {
+      if (typeof cleanup === 'function') { // Check if cleanup is a function before calling
         cleanup();
       }
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initCanvas]); // setIsTemplateDrawerOpen is stable
+  }, [initCanvas]); // setIsTemplateDrawerOpen is stable and initCanvas is from a hook
   
   useCanvasDrawing(
     fabricCanvas, 
@@ -115,3 +115,4 @@ export const DesignCanvas: React.FC = () => {
     </div>
   );
 };
+
