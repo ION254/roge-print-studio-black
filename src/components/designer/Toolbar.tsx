@@ -8,8 +8,9 @@ import { CircleButton } from './toolbar/buttons/CircleButton';
 import { TextButton } from './toolbar/buttons/TextButton';
 import { ImageUploadButton } from './toolbar/buttons/ImageUploadButton';
 import { ClearButton } from './toolbar/buttons/ClearButton';
-import { ShapeLibraryButton } from './toolbar/buttons/ShapeLibraryButton'; // New
-import { SuggestedDesignsButton } from './toolbar/buttons/SuggestedDesignsButton'; // New
+import { ShapeLibraryButton } from './toolbar/buttons/ShapeLibraryButton';
+import { SuggestedDesignsButton } from './toolbar/buttons/SuggestedDesignsButton';
+import { TemplateButton } from './toolbar/buttons/TemplateButton'; // New Template Button
 
 export type ActiveTool = 
   | 'select' 
@@ -17,18 +18,18 @@ export type ActiveTool =
   | 'rectangle' 
   | 'circle' 
   | 'text' 
-  // | 'image' // Image upload is an action, not a persistent tool state for highlighting in this setup
-  | 'shape-library' // New
-  | 'suggested-designs'; // New
+  | 'shape-library'
+  | 'suggested-designs';
 
 interface ToolbarProps {
   activeTool: ActiveTool;
   onToolClick: (tool: Extract<ActiveTool, 'select' | 'draw' | 'rectangle' | 'circle'>) => void;
-  onAddText: () => void; // Will also set activeTool to 'text' in DesignCanvas
+  onAddText: () => void;
   onImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onClear: () => void;
-  onOpenShapeLibrary: () => void; // New, will also set activeTool in DesignCanvas
-  onOpenSuggestedDesigns: () => void; // New, will also set activeTool in DesignCanvas
+  onOpenShapeLibrary: () => void;
+  onOpenSuggestedDesigns: () => void;
+  onOpenTemplates: () => void; // New prop for templates
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({ 
@@ -38,7 +39,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onImageUpload,
   onClear,
   onOpenShapeLibrary,
-  onOpenSuggestedDesigns
+  onOpenSuggestedDesigns,
+  onOpenTemplates // New prop handler
 }) => {
   return (
     <TooltipProvider>
@@ -50,6 +52,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <TextButton onClick={onAddText} isActive={activeTool === 'text'} />
         <ShapeLibraryButton onClick={onOpenShapeLibrary} isActive={activeTool === 'shape-library'} />
         <SuggestedDesignsButton onClick={onOpenSuggestedDesigns} isActive={activeTool === 'suggested-designs'} />
+        <TemplateButton onClick={onOpenTemplates} /> {/* New Templates button */}
         
         <ImageUploadButton onImageUpload={onImageUpload} />
         

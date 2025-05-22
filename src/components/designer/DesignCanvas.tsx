@@ -8,7 +8,10 @@ import { useCanvasDrawing } from '@/hooks/useCanvasDrawing';
 import { useCanvasShapes } from '@/hooks/useCanvasShapes';
 import { useCanvasText } from '@/hooks/useCanvasText';
 import { useCanvasImage } from '@/hooks/useCanvasImage';
-import { toast } from 'sonner'; // For placeholder notifications
+import { useTemplates } from '@/hooks/useTemplates'; // Import the template hook
+import { Templates } from './Templates'; // Import the Templates component
+import { ThreeDView } from './ThreeDView'; // Import the 3D view component
+import { toast } from 'sonner';
 
 export const DesignCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -19,11 +22,12 @@ export const DesignCanvas: React.FC = () => {
   const { addShape } = useCanvasShapes(fabricCanvas);
   const { addText } = useCanvasText(fabricCanvas);
   const { handleImageUpload } = useCanvasImage(fabricCanvas);
+  const { templates, isTemplateDrawerOpen, setIsTemplateDrawerOpen, applyTemplate } = useTemplates(fabricCanvas);
   
   useEffect(() => {
     const cleanup = initCanvas(canvasRef);
     return cleanup;
-  }, [initCanvas]); // initCanvas added to dependency array as it's a function from a hook
+  }, [initCanvas]);
   
   useCanvasDrawing(
     fabricCanvas, 
@@ -47,23 +51,23 @@ export const DesignCanvas: React.FC = () => {
 
   const handleOpenShapeLibrary = () => {
     setActiveTool('shape-library');
-    // Placeholder for opening shape library
     toast.info("Shape Library opened (placeholder functionality).");
     console.log("Shape Library tool activated. Color:", activeColor);
   };
 
   const handleOpenSuggestedDesigns = () => {
     setActiveTool('suggested-designs');
-    // Placeholder for opening suggested designs
     toast.info("Suggested Designs opened (placeholder functionality).");
     console.log("Suggested Designs tool activated. Color:", activeColor);
+  };
+
+  const handleOpenTemplates = () => {
+    setIsTemplateDrawerOpen(true);
   };
 
   const handleClearCanvas = () => {
     if (fabricCanvas) {
       fabricCanvas.clear();
-      // fabricCanvas.backgroundColor = '#ffffff'; // This might be handled by useDesignCanvas or if not, ensure it is reset
-      // Re-initialize background if cleared completely by fabricCanvas.clear()
       if (fabricCanvas.backgroundColor !== '#ffffff') {
          fabricCanvas.backgroundColor = '#ffffff';
       }
@@ -83,16 +87,25 @@ export const DesignCanvas: React.FC = () => {
           onImageUpload={handleImageUpload}
           onOpenShapeLibrary={handleOpenShapeLibrary}
           onOpenSuggestedDesigns={handleOpenSuggestedDesigns}
+          onOpenTemplates={handleOpenTemplates} // Add handler for templates button
         />
         <ColorPicker color={activeColor} onChange={setActiveColor} />
       </div>
       <div className="w-full h-[600px] border border-input rounded-md shadow-lg overflow-hidden bg-white" style={{ minHeight: '600px' }}> 
         <canvas ref={canvasRef} />
       </div>
-      <div className="mt-4 text-center">
-        {/* Pass fabricCanvas if CanvasActions needs it, or specific actions if refactored further */}
+      <div className="mt-4 flex justify-between items-center">
+        <ThreeDView />
         <CanvasActions fabricCanvas={fabricCanvas} />
       </div>
+
+      {/* Templates Drawer */}
+      <Templates 
+        open={isTemplateDrawerOpen}
+        onOpenChange={setIsTemplateDrawerOpen}
+        templates={templates}
+        onTemplateSelect={applyTemplate}
+      />
     </div>
   );
 };

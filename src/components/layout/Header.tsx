@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
@@ -20,9 +21,9 @@ const Header = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <div className="flex-shrink-0">
-            <a href="#" className="text-3xl font-bold text-primary">
+            <Link to="/" className="text-3xl font-bold text-primary">
               roge
-            </a>
+            </Link>
           </div>
           <nav className="hidden md:flex space-x-6">
             {navItems.map((item) => (

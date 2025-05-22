@@ -16,5 +16,8 @@ export const useCanvasDrawing = (
       fabricCanvas.freeDrawingBrush.color = color;
       fabricCanvas.freeDrawingBrush.width = 2;
     }
+    
+    // Ensure objects are rendered correctly by forcing a re-render
+    fabricCanvas.renderAll();
   }, [fabricCanvas, isDrawingMode, color]);
 };
