@@ -2,20 +2,41 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Menu, User } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const navItems = [
     { name: 'Home', href: '/' },
-    { name: 'Collection', href: '/collection' }, // Added Collection link
+    { name: 'Collection', href: '/collection' },
     { name: 'Products', href: '#products' },
     { name: 'How It Works', href: '#how-it-works' },
     { name: 'About Us', href: '#about-us' },
     { name: 'FAQ', href: '#faq' },
-    // { name: 'Contact', href: '#contact' }, // Contact can be in footer or a dedicated page
   ];
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith('/')) {
+      // Let React Router handle direct page navigations
+      return;
+    }
+    
+    e.preventDefault();
+    // If we're not on the home page and trying to navigate to a hash section
+    if (href.startsWith('#') && location.pathname !== '/') {
+      // Navigate to home page first, then scroll to section after navigation completes
+      navigate('/', { state: { scrollTo: href } });
+    } else if (href.startsWith('#') && location.pathname === '/') {
+      // Already on home page, just scroll to section
+      const element = document.querySelector(href);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
 
   return (
     <header className="bg-card shadow-md sticky top-0 z-50">
@@ -30,26 +51,14 @@ const Header = () => {
             {navItems.map((item) => (
               <a
                 key={item.name}
-                href={item.href} // Use href directly
-                onClick={(e) => {
-                  if (item.href.startsWith('/')) {
-                    // Let Link (if used inside) or default anchor behavior handle it.
-                    // For direct <a> tags, no need to preventDefault if it's a page navigation.
-                  } else if (item.href.startsWith('#') && window.location.pathname === '/') {
-                    e.preventDefault();
-                    const element = document.querySelector(item.href);
-                    if (element) {
-                      element.scrollIntoView({ behavior: 'smooth' });
-                    }
-                  } else if (item.href.startsWith('#') && window.location.pathname !== '/') {
-                    // If on a different page and it's a hash link, navigate to home then scroll
-                    // This might be better handled by Link component for hashes on different pages
-                    // For now, let it be a direct link to home + hash
-                  }
-                }}
+                href={item.href}
+                onClick={(e) => handleNavClick(e, item.href)}
                 className="text-foreground hover:text-primary transition-colors duration-200"
               >
-                {item.href.startsWith('/') ? <Link to={item.href}>{item.name}</Link> : item.name}
+                {item.href.startsWith('/') ? 
+                  <Link to={item.href}>{item.name}</Link> : 
+                  item.name
+                }
               </a>
             ))}
           </nav>
@@ -78,28 +87,17 @@ const Header = () => {
             {navItems.map((item) => (
               <a
                 key={item.name}
-                href={item.href} // Use href directly
+                href={item.href}
                 onClick={(e) => {
                   setIsMobileMenuOpen(false);
-                  if (item.href.startsWith('/')) {
-                    // Let Link (if used inside) or default anchor behavior handle it.
-                  } else if (item.href.startsWith('#') && window.location.pathname === '/') {
-                    e.preventDefault();
-                    const element = document.querySelector(item.href);
-                    if (element) {
-                      element.scrollIntoView({ behavior: 'smooth' });
-                    }
-                  } else if (item.href.startsWith('#') && window.location.pathname !== '/'){
-                     // If on a different page, Link component below will handle it correctly
-                  }
+                  handleNavClick(e, item.href);
                 }}
                 className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-muted hover:text-primary"
               >
                  {item.href.startsWith('/') ? (
                     <Link to={item.href}>{item.name}</Link>
                  ) : (
-                    // For hash links on mobile when not on homepage, link to homepage + hash
-                    window.location.pathname === '/' ? item.name : <Link to={`/${item.href}`}>{item.name}</Link>
+                    item.name
                  )}
               </a>
             ))}
