@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Toolbar, ActiveTool } from './Toolbar';
 import { ColorPicker } from './ColorPicker';
@@ -11,6 +10,7 @@ import { useCanvasImage } from '@/hooks/useCanvasImage';
 import { useTemplates } from '@/hooks/useTemplates';
 import { Templates } from './Templates';
 import { ThreeDView } from './ThreeDView';
+import { Measurements } from './Measurements';
 import { toast } from 'sonner';
 
 export const DesignCanvas: React.FC = () => {
@@ -83,6 +83,12 @@ export const DesignCanvas: React.FC = () => {
     }
   };
 
+  const handleMeasurementsChange = (measurements: Record<string, number>) => {
+    console.log('Measurements updated:', measurements);
+    // Here you would implement logic to update the garment based on measurements
+    toast.info("Measurements updated!");
+  };
+
   return (
     <div className="flex flex-col gap-4 w-full">
       <div className="flex flex-wrap items-center justify-between gap-4 p-2 border-b border-border">
@@ -102,7 +108,10 @@ export const DesignCanvas: React.FC = () => {
         <canvas ref={canvasRef} />
       </div>
       <div className="mt-4 flex justify-between items-center">
-        <ThreeDView />
+        <div className="flex gap-2">
+          <ThreeDView />
+          <Measurements onMeasurementsChange={handleMeasurementsChange} />
+        </div>
         <CanvasActions fabricCanvas={fabricCanvas} />
       </div>
 
@@ -115,4 +124,3 @@ export const DesignCanvas: React.FC = () => {
     </div>
   );
 };
-
