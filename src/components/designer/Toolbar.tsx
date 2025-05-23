@@ -10,7 +10,10 @@ import { ImageUploadButton } from './toolbar/buttons/ImageUploadButton';
 import { ClearButton } from './toolbar/buttons/ClearButton';
 import { ShapeLibraryButton } from './toolbar/buttons/ShapeLibraryButton';
 import { SuggestedDesignsButton } from './toolbar/buttons/SuggestedDesignsButton';
-import { TemplateButton } from './toolbar/buttons/TemplateButton'; // New Template Button
+import { TemplateButton } from './toolbar/buttons/TemplateButton';
+import { TextFormatMenu } from './TextFormatMenu';
+import { PrintingOptions } from './PrintingOptions';
+import { Canvas as FabricCanvas } from 'fabric';
 
 export type ActiveTool = 
   | 'select' 
@@ -29,7 +32,9 @@ interface ToolbarProps {
   onClear: () => void;
   onOpenShapeLibrary: () => void;
   onOpenSuggestedDesigns: () => void;
-  onOpenTemplates: () => void; // New prop for templates
+  onOpenTemplates: () => void;
+  fabricCanvas?: FabricCanvas | null;
+  onPrintingMethodSelect?: (method: string) => void;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({ 
@@ -40,24 +45,36 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onClear,
   onOpenShapeLibrary,
   onOpenSuggestedDesigns,
-  onOpenTemplates // New prop handler
+  onOpenTemplates,
+  fabricCanvas,
+  onPrintingMethodSelect
 }) => {
   return (
     <TooltipProvider>
-      <div className="flex items-center gap-2 p-2 border border-border rounded-lg bg-card shadow flex-wrap">
-        <SelectButton onClick={() => onToolClick('select')} isActive={activeTool === 'select'} />
-        <DrawButton onClick={() => onToolClick('draw')} isActive={activeTool === 'draw'} />
-        <RectangleButton onClick={() => onToolClick('rectangle')} isActive={activeTool === 'rectangle'} />
-        <CircleButton onClick={() => onToolClick('circle')} isActive={activeTool === 'circle'} />
-        <TextButton onClick={onAddText} isActive={activeTool === 'text'} />
-        <ShapeLibraryButton onClick={onOpenShapeLibrary} isActive={activeTool === 'shape-library'} />
-        <SuggestedDesignsButton onClick={onOpenSuggestedDesigns} isActive={activeTool === 'suggested-designs'} />
-        <TemplateButton onClick={onOpenTemplates} /> {/* New Templates button */}
+      <div className="flex flex-col gap-2 p-2 border border-border rounded-lg bg-card shadow">
+        {/* Primary Tools Row */}
+        <div className="flex items-center gap-1 flex-wrap">
+          <SelectButton onClick={() => onToolClick('select')} isActive={activeTool === 'select'} />
+          <DrawButton onClick={() => onToolClick('draw')} isActive={activeTool === 'draw'} />
+          <RectangleButton onClick={() => onToolClick('rectangle')} isActive={activeTool === 'rectangle'} />
+          <CircleButton onClick={() => onToolClick('circle')} isActive={activeTool === 'circle'} />
+          <TextButton onClick={onAddText} isActive={activeTool === 'text'} />
+          <ImageUploadButton onImageUpload={onImageUpload} />
+        </div>
         
-        <ImageUploadButton onImageUpload={onImageUpload} />
+        {/* Secondary Tools Row */}
+        <div className="flex items-center gap-1 flex-wrap">
+          <ShapeLibraryButton onClick={onOpenShapeLibrary} isActive={activeTool === 'shape-library'} />
+          <SuggestedDesignsButton onClick={onOpenSuggestedDesigns} isActive={activeTool === 'suggested-designs'} />
+          <TemplateButton onClick={onOpenTemplates} />
+          <TextFormatMenu fabricCanvas={fabricCanvas} />
+          <PrintingOptions onPrintingMethodSelect={onPrintingMethodSelect} />
+        </div>
         
-        <div className="border-l h-8 mx-2 border-border"></div>
-        <ClearButton onClick={onClear} />
+        {/* Actions Row */}
+        <div className="flex items-center gap-1 pt-2 border-t border-border">
+          <ClearButton onClick={onClear} />
+        </div>
       </div>
     </TooltipProvider>
   );

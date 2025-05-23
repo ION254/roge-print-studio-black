@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Toolbar, ActiveTool } from './Toolbar';
 import { ColorPicker } from './ColorPicker';
@@ -17,6 +18,7 @@ export const DesignCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [activeColor, setActiveColor] = useState<string>('#000000');
   const [activeTool, setActiveTool] = useState<ActiveTool>('select');
+  const [selectedPrintingMethod, setSelectedPrintingMethod] = useState<string>('dtg');
   
   const { fabricCanvas, initCanvas } = useDesignCanvas();
   const { addShape } = useCanvasShapes(fabricCanvas);
@@ -26,15 +28,13 @@ export const DesignCanvas: React.FC = () => {
   
   useEffect(() => {
     const cleanup = initCanvas(canvasRef);
-    // Open templates drawer on initial load
     setIsTemplateDrawerOpen(true);
     return () => {
-      if (typeof cleanup === 'function') { // Check if cleanup is a function before calling
+      if (typeof cleanup === 'function') {
         cleanup();
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initCanvas]); // setIsTemplateDrawerOpen is stable and initCanvas is from a hook
+  }, [initCanvas]);
   
   useCanvasDrawing(
     fabricCanvas, 
@@ -85,13 +85,17 @@ export const DesignCanvas: React.FC = () => {
 
   const handleMeasurementsChange = (measurements: Record<string, number>) => {
     console.log('Measurements updated:', measurements);
-    // Here you would implement logic to update the garment based on measurements
     toast.info("Measurements updated!");
+  };
+
+  const handlePrintingMethodSelect = (method: string) => {
+    setSelectedPrintingMethod(method);
+    console.log('Printing method selected:', method);
   };
 
   return (
     <div className="flex flex-col gap-4 w-full">
-      <div className="flex flex-wrap items-center justify-between gap-4 p-2 border-b border-border">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-2 border-b border-border">
         <Toolbar 
           activeTool={activeTool} 
           onToolClick={handleToolClick}
@@ -101,14 +105,23 @@ export const DesignCanvas: React.FC = () => {
           onOpenShapeLibrary={handleOpenShapeLibrary}
           onOpenSuggestedDesigns={handleOpenSuggestedDesigns}
           onOpenTemplates={handleOpenTemplates}
+          fabricCanvas={fabricCanvas}
+          onPrintingMethodSelect={handlePrintingMethodSelect}
         />
-        <ColorPicker color={activeColor} onChange={setActiveColor} />
+        <div className="flex items-center gap-2">
+          <ColorPicker color={activeColor} onChange={setActiveColor} />
+          {selectedPrintingMethod && (
+            <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded">
+              {selectedPrintingMethod.toUpperCase()}
+            </span>
+          )}
+        </div>
       </div>
       <div className="w-full h-[600px] border border-input rounded-md shadow-lg overflow-hidden bg-white" style={{ minHeight: '600px' }}> 
         <canvas ref={canvasRef} />
       </div>
-      <div className="mt-4 flex justify-between items-center">
-        <div className="flex gap-2">
+      <div className="mt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex gap-2 flex-wrap">
           <ThreeDView />
           <Measurements onMeasurementsChange={handleMeasurementsChange} />
         </div>
