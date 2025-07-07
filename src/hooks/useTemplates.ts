@@ -1,7 +1,26 @@
 
 import { useState } from 'react';
-import { Canvas as FabricCanvas, util, Group, Rect } from 'fabric';
+import { Canvas as FabricCanvas, Group, Rect, FabricObject } from 'fabric';
 import { toast } from 'sonner';
+
+// Custom interfaces for extended properties
+interface CustomFabricObject extends FabricObject {
+  data?: {
+    isMockup?: boolean;
+    productType?: string;
+  };
+  id?: string;
+  name?: string;
+}
+
+interface CustomGroup extends Group {
+  data?: {
+    isMockup?: boolean;
+    productType?: string;
+  };
+  id?: string;
+  name?: string;
+}
 
 // Updated Template type definition
 export interface Template {
@@ -50,12 +69,12 @@ const sampleTemplates: Template[] = [
 
 export const useTemplates = (
   fabricCanvas: FabricCanvas | null,
-  setActiveMockupObject: (obj: any | Group | null) => void,
+  setActiveMockupObject: (obj: CustomFabricObject | CustomGroup | null) => void,
   activeColor: string
 ) => {
   const [templates] = useState<Template[]>(sampleTemplates);
   const [isTemplateDrawerOpen, setIsTemplateDrawerOpen] = useState(false);
-  const [currentMockup, setCurrentMockup] = useState<Group | null>(null);
+  const [currentMockup, setCurrentMockup] = useState<CustomFabricObject | CustomGroup | null>(null);
 
   const applyTemplate = (template: Template) => {
     if (!fabricCanvas) return;
@@ -98,18 +117,21 @@ export const useTemplates = (
       hasControls: true,
     });
     
-    // Add custom properties
-    (rect as any).data = { isMockup: true, productType: template.productType };
-    (rect as any).name = `${template.productType}_mockup`;
+    // Add custom properties using Object.assign to avoid TypeScript issues
+    const customRect = Object.assign(rect, {
+      data: { isMockup: true, productType: template.productType },
+      name: `${template.productType}_mockup`,
+      id: 'product_body'
+    }) as CustomFabricObject;
     
-    fabricCanvas.add(rect);
-    fabricCanvas.centerObject(rect);
-    rect.setCoords();
-    fabricCanvas.setActiveObject(rect);
+    fabricCanvas.add(customRect);
+    fabricCanvas.centerObject(customRect);
+    customRect.setCoords();
+    fabricCanvas.setActiveObject(customRect);
     fabricCanvas.renderAll();
     
-    setCurrentMockup(rect as any);
-    setActiveMockupObject(rect as any);
+    setCurrentMockup(customRect);
+    setActiveMockupObject(customRect);
 
     toast.success(`Applied template: ${template.name}`);
     setIsTemplateDrawerOpen(false);

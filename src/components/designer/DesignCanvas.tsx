@@ -14,13 +14,32 @@ import { Measurements } from './Measurements';
 import { toast } from 'sonner';
 import { Group, FabricObject } from 'fabric';
 
+// Extend FabricObject to include custom properties
+interface CustomFabricObject extends FabricObject {
+  data?: {
+    isMockup?: boolean;
+    productType?: string;
+  };
+  id?: string;
+  name?: string;
+}
+
+interface CustomGroup extends Group {
+  data?: {
+    isMockup?: boolean;
+    productType?: string;
+  };
+  id?: string;
+  name?: string;
+}
+
 export const DesignCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [drawingColor, setDrawingColor] = useState<string>('#000000'); // For drawing, shapes, text
   const [mockupColor, setMockupColor] = useState<string>('#cccccc'); // For mockup base color
   const [activeTool, setActiveTool] = useState<ActiveTool>('select');
   const [selectedPrintingMethod, setSelectedPrintingMethod] = useState<string>('dtg');
-  const [activeMockupObject, setActiveMockupObject] = useState<FabricObject | Group | null>(null);
+  const [activeMockupObject, setActiveMockupObject] = useState<CustomFabricObject | CustomGroup | null>(null);
   
   const { fabricCanvas, initCanvas } = useDesignCanvas();
   const { addShape } = useCanvasShapes(fabricCanvas);
@@ -52,14 +71,19 @@ export const DesignCanvas: React.FC = () => {
 
   // Update mockup color when mockupColor state changes and a mockup is active
   useEffect(() => {
-    if (activeMockupObject && fabricCanvas && (activeMockupObject as any).data?.isMockup) {
-      const mockupGroup = activeMockupObject as Group; // Assuming it's a group
-      const productBody = mockupGroup.getObjects().find(obj => (obj as any).id === 'product_body');
-      
-      if (productBody) {
-        productBody.set('fill', mockupColor);
-      } else if (mockupGroup.item(0)) { // Fallback
-        mockupGroup.item(0).set('fill', mockupColor);
+    if (activeMockupObject && fabricCanvas && activeMockupObject.data?.isMockup) {
+      if (activeMockupObject instanceof Group) {
+        const mockupGroup = activeMockupObject as CustomGroup;
+        const productBody = mockupGroup.getObjects().find(obj => (obj as CustomFabricObject).id === 'product_body');
+        
+        if (productBody) {
+          productBody.set('fill', mockupColor);
+        } else if (mockupGroup.item(0)) { // Fallback
+          mockupGroup.item(0).set('fill', mockupColor);
+        }
+      } else {
+        // If it's a single object, update its fill directly
+        activeMockupObject.set('fill', mockupColor);
       }
       fabricCanvas.renderAll();
     }
@@ -98,7 +122,7 @@ export const DesignCanvas: React.FC = () => {
     if (fabricCanvas) {
       // If there's a mockup, re-apply it (effectively clearing designs but not mockup itself)
       // Otherwise, clear everything.
-      const activeTemplate = templates.find(t => currentMockup && (currentMockup as any).name === `${t.productType}_mockup`);
+      const activeTemplate = templates.find(t => currentMockup && (currentMockup as CustomFabricObject).name === `${t.productType}_mockup`);
       if (activeTemplate && currentMockup) {
           // Clear everything *except* the current mockup
           fabricCanvas.getObjects().forEach(obj => {
@@ -107,9 +131,14 @@ export const DesignCanvas: React.FC = () => {
               }
           });
           // Reset mockup to its initial color if needed, or keep current mockupColor
-          const productBody = currentMockup.getObjects().find(o => (o as any).id === 'product_body');
-          if (productBody) productBody.set('fill', mockupColor);
-          else if (currentMockup.item(0)) currentMockup.item(0).set('fill', mockupColor);
+          if (currentMockup instanceof Group) {
+            const productBody = currentMockup.getObjects().find(o => (o as CustomFabricObject).id === 'product_body');
+            if (productBody) productBody.set('fill', mockupColor);
+            else if (currentMockup.item(0)) currentMockup.item(0).set('fill', mockupColor);
+           } else {
+             // currentMockup is a single fabric object
+             (currentMockup as CustomFabricObject).set('fill', mockupColor);
+           }
 
       } else {
           fabricCanvas.clear();
@@ -172,7 +201,7 @@ export const DesignCanvas: React.FC = () => {
           {/* Pass current mockup data to 3D view if needed, or canvas data URL */}
           <ThreeDView 
             canvasData={fabricCanvas?.toDataURL({ format: 'png', quality: 0.8, multiplier: 1 })}
-            productType={(activeMockupObject as any)?.data?.productType}
+            productType={activeMockupObject?.data?.productType}
           />
           <Measurements onMeasurementsChange={handleMeasurementsChange} />
         </div>
