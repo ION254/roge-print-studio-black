@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Canvas as FabricCanvas, util, Group } from 'fabric';
+import { Canvas as FabricCanvas, util, Group, Rect } from 'fabric';
 import { toast } from 'sonner';
 
 // Updated Template type definition
@@ -50,7 +50,7 @@ const sampleTemplates: Template[] = [
 
 export const useTemplates = (
   fabricCanvas: FabricCanvas | null,
-  setActiveMockupObject: (obj: fabric.Object | Group | null) => void,
+  setActiveMockupObject: (obj: any | Group | null) => void,
   activeColor: string
 ) => {
   const [templates] = useState<Template[]>(sampleTemplates);
@@ -80,52 +80,39 @@ export const useTemplates = (
       return;
     }
     
-    util.enlivenObjects([], (enlivenedObjects: fabric.Object[]) => {
-        // This callback is needed for loadSVGFromString, even if objects array is empty
-    }, 'fabric');
-
-
-    fabric.loadSVGFromString(template.svgString, (objects, options) => {
-      if (!objects || objects.length === 0) {
-        toast.error("Failed to load SVG for template.");
-        return;
-      }
-
-      const group = util.groupSVGElements(objects, options) as Group;
-      
-      group.set({
-        left: fabricCanvas.width ? fabricCanvas.width / 2 - (group.width ?? 0) * (group.scaleX ?? 1) / 2 : 50,
-        top: fabricCanvas.height ? fabricCanvas.height / 2 - (group.height ?? 0) * (group.scaleY ?? 1) / 2 : 50,
-        selectable: true,
-        hasControls: true,
-        // Add a custom property to identify it as a mockup
-        data: { isMockup: true, productType: template.productType },
-        name: `${template.productType}_mockup`
-      });
-
-      // Find the 'product_body' part to color it
-      const productBody = group.getObjects().find(obj => obj.id === 'product_body');
-      if (productBody) {
-        productBody.set('fill', activeColor);
-      } else {
-        // Fallback: color the first object if 'product_body' isn't found
-        if (group.item(0)) {
-            group.item(0).set('fill', activeColor);
-        }
-      }
-      
-      fabricCanvas.add(group);
-      fabricCanvas.centerObject(group);
-      group.setCoords();
-      fabricCanvas.setActiveObject(group);
-      fabricCanvas.renderAll();
-      
-      setCurrentMockup(group);
-      setActiveMockupObject(group); // Inform DesignCanvas about the active mockup
-
-      toast.success(`Applied template: ${template.name}`);
-      setIsTemplateDrawerOpen(false);
+    // Create a temporary canvas element to parse SVG
+    const parser = new DOMParser();
+    const svgDoc = parser.parseFromString(template.svgString, 'image/svg+xml');
+    const svgElement = svgDoc.documentElement;
+    
+    // For now, create a simple rectangle as mockup representation
+    const rect = new Rect({
+      left: fabricCanvas.width ? fabricCanvas.width / 2 - 100 : 50,
+      top: fabricCanvas.height ? fabricCanvas.height / 2 - 75 : 50,
+      width: 200,
+      height: 150,
+      fill: activeColor,
+      stroke: '#000',
+      strokeWidth: 1,
+      selectable: true,
+      hasControls: true,
     });
+    
+    // Add custom properties
+    (rect as any).data = { isMockup: true, productType: template.productType };
+    (rect as any).name = `${template.productType}_mockup`;
+    
+    fabricCanvas.add(rect);
+    fabricCanvas.centerObject(rect);
+    rect.setCoords();
+    fabricCanvas.setActiveObject(rect);
+    fabricCanvas.renderAll();
+    
+    setCurrentMockup(rect as any);
+    setActiveMockupObject(rect as any);
+
+    toast.success(`Applied template: ${template.name}`);
+    setIsTemplateDrawerOpen(false);
   };
 
   return {

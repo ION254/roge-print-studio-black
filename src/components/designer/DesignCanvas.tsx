@@ -52,9 +52,9 @@ export const DesignCanvas: React.FC = () => {
 
   // Update mockup color when mockupColor state changes and a mockup is active
   useEffect(() => {
-    if (activeMockupObject && fabricCanvas && activeMockupObject.data?.isMockup) {
+    if (activeMockupObject && fabricCanvas && (activeMockupObject as any).data?.isMockup) {
       const mockupGroup = activeMockupObject as Group; // Assuming it's a group
-      const productBody = mockupGroup.getObjects().find(obj => obj.id === 'product_body');
+      const productBody = mockupGroup.getObjects().find(obj => (obj as any).id === 'product_body');
       
       if (productBody) {
         productBody.set('fill', mockupColor);
@@ -98,7 +98,7 @@ export const DesignCanvas: React.FC = () => {
     if (fabricCanvas) {
       // If there's a mockup, re-apply it (effectively clearing designs but not mockup itself)
       // Otherwise, clear everything.
-      const activeTemplate = templates.find(t => currentMockup && currentMockup.name === `${t.productType}_mockup`);
+      const activeTemplate = templates.find(t => currentMockup && (currentMockup as any).name === `${t.productType}_mockup`);
       if (activeTemplate && currentMockup) {
           // Clear everything *except* the current mockup
           fabricCanvas.getObjects().forEach(obj => {
@@ -107,7 +107,7 @@ export const DesignCanvas: React.FC = () => {
               }
           });
           // Reset mockup to its initial color if needed, or keep current mockupColor
-          const productBody = currentMockup.getObjects().find(o => o.id === 'product_body');
+          const productBody = currentMockup.getObjects().find(o => (o as any).id === 'product_body');
           if (productBody) productBody.set('fill', mockupColor);
           else if (currentMockup.item(0)) currentMockup.item(0).set('fill', mockupColor);
 
@@ -171,8 +171,8 @@ export const DesignCanvas: React.FC = () => {
         <div className="flex gap-2 flex-wrap">
           {/* Pass current mockup data to 3D view if needed, or canvas data URL */}
           <ThreeDView 
-            canvasData={fabricCanvas?.toDataURL({ format: 'png', quality: 0.8 })}
-            productType={activeMockupObject?.data?.productType}
+            canvasData={fabricCanvas?.toDataURL({ format: 'png', quality: 0.8, multiplier: 1 })}
+            productType={(activeMockupObject as any)?.data?.productType}
           />
           <Measurements onMeasurementsChange={handleMeasurementsChange} />
         </div>

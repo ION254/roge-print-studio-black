@@ -11,6 +11,7 @@ import DesignerPage from "./pages/DesignerPage";
 import ProfilePage from "./pages/ProfilePage";
 import CollectionPage from "./pages/CollectionPage";
 import AuthPage from "./pages/AuthPage";
+import ManufacturersPage from "./pages/ManufacturersPage";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/designer" element={<DesignerPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/collection" element={<CollectionPage />} />
+            <Route path="/manufacturers" element={<ManufacturersPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
