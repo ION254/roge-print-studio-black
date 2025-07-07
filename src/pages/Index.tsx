@@ -11,9 +11,11 @@ import AboutUs from '@/components/home/AboutUs';
 import FaqSection from '@/components/home/FaqSection';
 
 const Index = () => {
+  console.log('Index component rendering');
   const location = useLocation();
 
   useEffect(() => {
+    console.log('Index useEffect running');
     // Check if there's a section to scroll to in the location state
     const scrollTo = location.state?.scrollTo;
     if (scrollTo) {
