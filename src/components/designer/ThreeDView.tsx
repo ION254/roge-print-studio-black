@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Button } from '@/components/ui/button';
 import { View, RotateCcw, RotateCw, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Plane, Box, Sphere, useTexture } from '@react-three/drei';
+import { OrbitControls, Plane, Box, Sphere } from '@react-three/drei';
 
 interface ThreeDViewProps {
   canvasData?: string; // Data URL of the 2D canvas design
@@ -14,21 +14,15 @@ interface ThreeDViewProps {
 type ViewAngle = 'front' | 'left' | 'right' | 'top' | 'bottom' | 'back' | 'perspective';
 
 const PlaceholderContent: React.FC<{productType?: string, canvasData?: string}> = ({ productType, canvasData }) => {
-  const texture = useTexture(canvasData || '/placeholder.svg'); // Use canvas data as texture
-
-  // Placeholder images for different product types
-  const productPlaceholders: Record<string, string> = {
-    't-shirt': 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=60', // T-shirt like image
-    'hoodie': 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=60', // Hoodie like image
-    'cap': 'https://images.unsplash.com/photo-1521369909029-2af60d4f7095?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=60', // Cap image
+  // Simple color mapping for different product types
+  const productColors: Record<string, string> = {
+    't-shirt': '#e0e0e0',
+    'hoodie': '#d0d0d0', 
+    'cap': '#c0c0c0',
+    'general': '#f0f0f0'
   };
 
-  const placeholderTexture = useTexture(productPlaceholders[productType || 't-shirt'] || productPlaceholders['t-shirt']);
-
-
-  // Determine which texture to use
-  // If canvasData is meaningful (not placeholder), use it. Otherwise, use product-specific placeholder.
-  const displayTexture = canvasData && !canvasData.includes('placeholder.svg') ? texture : placeholderTexture;
+  const productColor = productColors[productType || 'general'] || productColors.general;
 
 
   return (
@@ -43,7 +37,7 @@ const PlaceholderContent: React.FC<{productType?: string, canvasData?: string}> 
       </Plane>
 
       <Box args={[1, 1.5, 0.2]} position={[0, -0.75, 0]} castShadow>
-        <meshStandardMaterial map={displayTexture} roughness={0.7} metalness={0.1} />
+        <meshStandardMaterial color={productColor} roughness={0.7} metalness={0.1} />
       </Box>
 
       {/* Simple representation of a "mannequin" or stand - a sphere and a cylinder */}
