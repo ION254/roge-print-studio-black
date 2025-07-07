@@ -60,17 +60,24 @@ const Header = () => {
           </div>
           <nav className="hidden md:flex space-x-6">
             {navItems.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                onClick={(e) => handleNavClick(e, item.href)}
-                className="text-foreground hover:text-primary transition-colors duration-200"
-              >
-                {item.href.startsWith('/') ? 
-                  <Link to={item.href}>{item.name}</Link> : 
-                  item.name
-                }
-              </a>
+              item.href.startsWith('/') ? (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className="text-foreground hover:text-primary transition-colors duration-200"
+                >
+                  {item.name}
+                </Link>
+              ) : (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  onClick={(e) => handleNavClick(e, item.href)}
+                  className="text-foreground hover:text-primary transition-colors duration-200"
+                >
+                  {item.name}
+                </a>
+              )
             ))}
           </nav>
           <div className="hidden md:flex items-center space-x-2">
@@ -118,21 +125,28 @@ const Header = () => {
         <div className="md:hidden bg-card border-t border-border">
           <nav className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             {navItems.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                onClick={(e) => {
-                  setIsMobileMenuOpen(false);
-                  handleNavClick(e, item.href);
-                }}
-                className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-muted hover:text-primary"
-              >
-                 {item.href.startsWith('/') ? (
-                    <Link to={item.href}>{item.name}</Link>
-                 ) : (
-                    item.name
-                 )}
-              </a>
+              item.href.startsWith('/') ? (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-muted hover:text-primary"
+                >
+                  {item.name}
+                </Link>
+              ) : (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  onClick={(e) => {
+                    setIsMobileMenuOpen(false);
+                    handleNavClick(e, item.href);
+                  }}
+                  className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-muted hover:text-primary"
+                >
+                  {item.name}
+                </a>
+              )
             ))}
             {user ? (
               <>
