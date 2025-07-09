@@ -1,23 +1,15 @@
 
-import React, { useState, Suspense, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { View, RotateCcw, RotateCw, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Plane, Box, Sphere } from '@react-three/drei';
-import { toast } from 'sonner';
+import { View, AlertCircle } from 'lucide-react';
 
 interface ThreeDViewProps {
-  canvasData?: string; // Data URL of the 2D canvas design
+  canvasData?: string;
   productType?: 't-shirt' | 'hoodie' | 'cap' | 'general' | string;
 }
 
-type ViewAngle = 'front' | 'left' | 'right' | 'top' | 'bottom' | 'back' | 'perspective';
-
-const PlaceholderContent: React.FC<{productType?: string, canvasData?: string}> = ({ productType, canvasData }) => {
-  console.log('ThreeDView PlaceholderContent rendering:', { productType, hasCanvasData: !!canvasData });
-  
-  // Simple color mapping for different product types
+const MockupPreview: React.FC<{ productType?: string }> = ({ productType }) => {
   const productColors: Record<string, string> = {
     't-shirt': '#e0e0e0',
     'hoodie': '#d0d0d0', 
@@ -27,76 +19,33 @@ const PlaceholderContent: React.FC<{productType?: string, canvasData?: string}> 
 
   const productColor = productColors[productType || 'general'] || productColors.general;
 
-  try {
-    return (
-      <>
-        <ambientLight intensity={0.8} />
-        <directionalLight position={[5, 5, 5]} intensity={1} />
-        <directionalLight position={[-5, -5, -5]} intensity={0.5} />
-        
-        {/* Ground plane */}
-        <Plane args={[3, 3]} rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]} receiveShadow>
-           <meshStandardMaterial color="#f0f0f0" />
-        </Plane>
-
-        {/* Product mockup */}
-        <Box args={[1, 1.5, 0.2]} position={[0, -0.75, 0]} castShadow>
-          <meshStandardMaterial color={productColor} roughness={0.7} metalness={0.1} />
-        </Box>
-
-        {/* Simple mannequin head */}
-        <Sphere args={[0.3, 32, 32]} position={[0, 0.5, 0]} castShadow>
-           <meshStandardMaterial color="lightgray" roughness={0.5}/>
-        </Sphere>
-        
-        {/* Basic stand */}
-        <mesh position={[0, -1.125, 0]} castShadow>
-          <cylinderGeometry args={[0.2, 0.2, 0.75, 32]} />
-          <meshStandardMaterial color="darkgray" />
-        </mesh>
-
-        <OrbitControls enableZoom={true} enablePan={true} />
-      </>
-    );
-  } catch (error) {
-    console.error('Error in PlaceholderContent:', error);
-    toast.error('3D scene rendering error');
-    return null;
-  }
+  return (
+    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+      <div className="text-center">
+        <div 
+          className="w-32 h-40 mx-auto mb-4 rounded-lg shadow-lg transform rotate-y-12"
+          style={{ 
+            backgroundColor: productColor,
+            boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+            transform: 'perspective(300px) rotateY(15deg)'
+          }}
+        />
+        <h3 className="text-lg font-medium text-gray-700">
+          {productType ? productType.charAt(0).toUpperCase() + productType.slice(1) : 'Product'} Preview
+        </h3>
+        <p className="text-sm text-gray-500 mt-2">
+          3D rendering temporarily unavailable
+        </p>
+        <p className="text-xs text-gray-400 mt-1">
+          Showing simplified mockup
+        </p>
+      </div>
+    </div>
+  );
 };
 
-
 export const ThreeDView: React.FC<ThreeDViewProps> = ({ canvasData, productType }) => {
-  console.log('ThreeDView component rendering:', { hasCanvasData: !!canvasData, productType });
-  
-  const [currentView, setCurrentView] = useState<ViewAngle>('perspective');
   const [isOpen, setIsOpen] = useState(false);
-
-  const viewOptions = [
-    { angle: 'perspective' as ViewAngle, label: 'Perspective', icon: View },
-    { angle: 'front' as ViewAngle, label: 'Front', icon: View },
-    { angle: 'left' as ViewAngle, label: 'Left', icon: ArrowLeft },
-    { angle: 'right' as ViewAngle, label: 'Right', icon: ArrowRight },
-    { angle: 'top' as ViewAngle, label: 'Top', icon: ArrowUp },
-    { angle: 'bottom' as ViewAngle, label: 'Bottom', icon: ArrowDown },
-    { angle: 'back' as ViewAngle, label: 'Back', icon: RotateCw },
-  ];
-
-  // Memoize camera positions for different views
-  const cameraPositions = useMemo(() => ({
-    perspective: [0, 0, 5],
-    front: [0, 0, 5],
-    left: [-5, 0, 0],
-    right: [5, 0, 0],
-    top: [0, 5, 0.01],
-    bottom: [0, -5, 0.01],
-    back: [0, 0, -5],
-  }), []);
-
-  const handleViewChange = (angle: ViewAngle) => {
-    console.log('Changing view to:', angle);
-    setCurrentView(angle);
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -106,65 +55,18 @@ export const ThreeDView: React.FC<ThreeDViewProps> = ({ canvasData, productType 
           3D Preview
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[900px] min-h-[600px] flex flex-col">
+      <DialogContent className="sm:max-w-[700px] h-[500px]">
         <DialogHeader>
-          <DialogTitle>3D Preview - {productType ? productType.charAt(0).toUpperCase() + productType.slice(1) : 'Item'} - {currentView.charAt(0).toUpperCase() + currentView.slice(1)} View</DialogTitle>
+          <DialogTitle>
+            3D Preview - {productType ? productType.charAt(0).toUpperCase() + productType.slice(1) : 'Item'}
+          </DialogTitle>
           <DialogDescription>
-            Interact with the 3D model. A simple representation is shown.
+            Preview your design in a simplified 3D view.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="flex gap-4 flex-grow min-h-[450px]">
-          {/* View Controls */}
-          <div className="flex flex-col gap-2 min-w-[140px] py-2 pr-2 border-r">
-            <h3 className="text-sm font-medium mb-2">View Angles</h3>
-            {viewOptions.map(({ angle, label, icon: Icon }) => (
-              <Button
-                key={angle}
-                variant={currentView === angle ? "default" : "outline"}
-                size="sm"
-                onClick={() => handleViewChange(angle)}
-                className="justify-start gap-2"
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-              </Button>
-            ))}
-            
-            <div className="mt-auto pt-4 border-t">
-              <h4 className="text-sm font-medium mb-2">Controls</h4>
-              <p className="text-xs text-muted-foreground">Use mouse to rotate, scroll to zoom.</p>
-            </div>
-          </div>
-
-          {/* 3D Preview Area */}
-          <div className="flex-1 flex items-center justify-center bg-muted rounded-md overflow-hidden relative">
-            <Suspense fallback={
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" /> 
-                <span className="ml-2">Loading 3D Scene...</span>
-              </div>
-            }>
-              <Canvas 
-                shadows 
-                camera={{ 
-                  position: cameraPositions[currentView] as [number,number,number], 
-                  fov: 50 
-                }}
-                key={currentView}
-                className="w-full h-full"
-                onCreated={(state) => {
-                  console.log('Canvas created successfully', state);
-                }}
-                onError={(error) => {
-                  console.error('Canvas error:', error);
-                  toast.error('3D rendering failed');
-                }}
-              >
-                <PlaceholderContent productType={productType} canvasData={canvasData}/>
-              </Canvas>
-            </Suspense>
-          </div>
+        <div className="flex-1 rounded-md overflow-hidden">
+          <MockupPreview productType={productType} />
         </div>
       </DialogContent>
     </Dialog>
