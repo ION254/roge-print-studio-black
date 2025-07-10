@@ -49,6 +49,16 @@ export const ManufacturerForm: React.FC<ManufacturerFormProps> = ({
     description: manufacturer?.description || '',
   });
   
+  const [workDescription, setWorkDescription] = useState({
+    services_offered: '',
+    equipment_capabilities: '',
+    quality_standards: '',
+    experience_years: '',
+    industries_served: '',
+    production_capacity: '',
+    unique_selling_points: '',
+  });
+  
   const [specialties, setSpecialties] = useState<string[]>(manufacturer?.specialties || []);
   const [certifications, setCertifications] = useState<string[]>(manufacturer?.certifications || []);
   const [newSpecialty, setNewSpecialty] = useState('');
@@ -85,8 +95,21 @@ export const ManufacturerForm: React.FC<ManufacturerFormProps> = ({
 
     setLoading(true);
     try {
+      // Combine basic description with detailed work description
+      const combinedDescription = [
+        formData.description,
+        workDescription.services_offered && `Services: ${workDescription.services_offered}`,
+        workDescription.equipment_capabilities && `Equipment: ${workDescription.equipment_capabilities}`,
+        workDescription.production_capacity && `Capacity: ${workDescription.production_capacity}`,
+        workDescription.quality_standards && `Quality: ${workDescription.quality_standards}`,
+        workDescription.experience_years && `Experience: ${workDescription.experience_years}`,
+        workDescription.industries_served && `Industries: ${workDescription.industries_served}`,
+        workDescription.unique_selling_points && `USP: ${workDescription.unique_selling_points}`,
+      ].filter(Boolean).join('\n\n');
+
       const manufacturerData = {
         ...formData,
+        description: combinedDescription,
         specialties,
         certifications,
         user_id: user.id,
@@ -183,13 +206,100 @@ export const ManufacturerForm: React.FC<ManufacturerFormProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">Company Overview</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Describe your manufacturing capabilities and services..."
+                placeholder="Brief overview of your company and manufacturing focus..."
+                rows={3}
               />
+            </div>
+
+            {/* Enhanced Work Description Section */}
+            <div className="space-y-6 border-t pt-6">
+              <h3 className="text-lg font-semibold text-foreground">Detailed Work Description</h3>
+              <p className="text-sm text-muted-foreground">
+                Help customers understand your capabilities by providing detailed information about your work.
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="services_offered">Services Offered *</Label>
+                  <Textarea
+                    id="services_offered"
+                    value={workDescription.services_offered}
+                    onChange={(e) => setWorkDescription({ ...workDescription, services_offered: e.target.value })}
+                    placeholder="e.g., CNC machining, 3D printing, injection molding, laser cutting..."
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="equipment_capabilities">Equipment & Capabilities</Label>
+                  <Textarea
+                    id="equipment_capabilities"
+                    value={workDescription.equipment_capabilities}
+                    onChange={(e) => setWorkDescription({ ...workDescription, equipment_capabilities: e.target.value })}
+                    placeholder="Describe your machinery, technology, and technical capabilities..."
+                    rows={3}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="production_capacity">Production Capacity</Label>
+                  <Textarea
+                    id="production_capacity"
+                    value={workDescription.production_capacity}
+                    onChange={(e) => setWorkDescription({ ...workDescription, production_capacity: e.target.value })}
+                    placeholder="Volume capabilities, batch sizes, materials you work with..."
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="quality_standards">Quality Standards & Processes</Label>
+                  <Textarea
+                    id="quality_standards"
+                    value={workDescription.quality_standards}
+                    onChange={(e) => setWorkDescription({ ...workDescription, quality_standards: e.target.value })}
+                    placeholder="Quality control processes, testing procedures, standards compliance..."
+                    rows={3}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="experience_years">Years of Experience</Label>
+                  <Input
+                    id="experience_years"
+                    value={workDescription.experience_years}
+                    onChange={(e) => setWorkDescription({ ...workDescription, experience_years: e.target.value })}
+                    placeholder="e.g., 15+ years"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="industries_served">Industries Served</Label>
+                  <Input
+                    id="industries_served"
+                    value={workDescription.industries_served}
+                    onChange={(e) => setWorkDescription({ ...workDescription, industries_served: e.target.value })}
+                    placeholder="e.g., Automotive, Aerospace, Medical, Consumer Products..."
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="unique_selling_points">What Makes You Stand Out</Label>
+                <Textarea
+                  id="unique_selling_points"
+                  value={workDescription.unique_selling_points}
+                  onChange={(e) => setWorkDescription({ ...workDescription, unique_selling_points: e.target.value })}
+                  placeholder="Your competitive advantages, unique capabilities, notable achievements..."
+                  rows={3}
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

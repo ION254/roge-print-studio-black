@@ -107,20 +107,55 @@ const ManufacturersPage = () => {
               Connect with verified manufacturers who can bring your custom designs to life with precision and quality.
             </p>
             
-            {user && (
+            {/* Call to Action for Registration */}
+            <div className="bg-card border rounded-lg p-8 mb-8 max-w-4xl mx-auto">
+              <h2 className="text-2xl font-semibold text-foreground mb-4">
+                Join Our Manufacturing Network
+              </h2>
+              <p className="text-muted-foreground mb-6">
+                Expand your business by connecting with customers who need custom manufacturing services. 
+                Showcase your capabilities, equipment, and expertise to reach new clients.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 text-sm">
+                <div className="text-center">
+                  <div className="font-medium text-foreground">Get More Orders</div>
+                  <div className="text-muted-foreground">Connect with customers actively seeking manufacturing partners</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-medium text-foreground">Showcase Your Work</div>
+                  <div className="text-muted-foreground">Highlight your capabilities, equipment, and past projects</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-medium text-foreground">Verified Profile</div>
+                  <div className="text-muted-foreground">Build trust with customers through our verification process</div>
+                </div>
+              </div>
+              
               <div className="flex justify-center gap-4">
-                {!userManufacturer ? (
-                  <Button onClick={() => setShowForm(true)} size="lg" className="gap-2">
-                    <Plus className="h-5 w-5" />
-                    Become a Manufacturing Partner
-                  </Button>
+                {user ? (
+                  !userManufacturer ? (
+                    <Button onClick={() => setShowForm(true)} size="lg" className="gap-2">
+                      <Plus className="h-5 w-5" />
+                      Register as Manufacturing Partner
+                    </Button>
+                  ) : (
+                    <Button onClick={() => setShowForm(true)} variant="outline" size="lg">
+                      Edit Your Profile
+                    </Button>
+                  )
                 ) : (
-                  <Button onClick={() => setShowForm(true)} variant="outline" size="lg">
-                    Edit Your Profile
-                  </Button>
+                  <div className="space-y-4">
+                    <Button onClick={() => setShowForm(true)} size="lg" className="gap-2">
+                      <Plus className="h-5 w-5" />
+                      Register as Manufacturing Partner
+                    </Button>
+                    <p className="text-sm text-muted-foreground">
+                      Already have an account? Sign in to manage your profile
+                    </p>
+                  </div>
                 )}
               </div>
-            )}
+            </div>
           </div>
 
           {/* Manufacturer Form Modal */}
