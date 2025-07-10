@@ -39,6 +39,18 @@ const ManufacturersPage = () => {
     }
   }, [user]);
 
+  // Redirect existing manufacturers to their dashboard
+  useEffect(() => {
+    if (userManufacturer && user) {
+      // If user has a manufacturer profile and came here directly, redirect to dashboard
+      const urlParams = new URLSearchParams(window.location.search);
+      const fromAuth = urlParams.get('from') === 'auth';
+      if (fromAuth) {
+        window.location.href = '/manufacturer-dashboard';
+      }
+    }
+  }, [userManufacturer, user]);
+
   const fetchManufacturers = async () => {
     try {
       const { data, error } = await supabase
@@ -139,18 +151,23 @@ const ManufacturersPage = () => {
                       Register as Manufacturing Partner
                     </Button>
                   ) : (
-                    <Button onClick={() => setShowForm(true)} variant="outline" size="lg">
-                      Edit Your Profile
-                    </Button>
+                    <div className="space-y-4">
+                      <Button onClick={() => window.location.href = '/manufacturer-dashboard'} size="lg">
+                        Go to Dashboard
+                      </Button>
+                      <Button onClick={() => setShowForm(true)} variant="outline" size="lg">
+                        Edit Profile
+                      </Button>
+                    </div>
                   )
                 ) : (
                   <div className="space-y-4">
-                    <Button onClick={() => setShowForm(true)} size="lg" className="gap-2">
+                    <Button onClick={() => window.location.href = '/auth?redirect=manufacturers&from=manufacturers'} size="lg" className="gap-2">
                       <Plus className="h-5 w-5" />
-                      Register as Manufacturing Partner
+                      Sign In to Register
                     </Button>
                     <p className="text-sm text-muted-foreground">
-                      Already have an account? Sign in to manage your profile
+                      Sign in or create an account to register as a manufacturing partner
                     </p>
                   </div>
                 )}

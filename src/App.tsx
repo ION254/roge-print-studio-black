@@ -12,6 +12,7 @@ import ProfilePage from "./pages/ProfilePage";
 import CollectionPage from "./pages/CollectionPage";
 import AuthPage from "./pages/AuthPage";
 import ManufacturersPage from "./pages/ManufacturersPage";
+import ManufacturerDashboard from "./pages/ManufacturerDashboard";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/collection" element={<CollectionPage />} />
             <Route path="/manufacturers" element={<ManufacturersPage />} />
+            <Route path="/manufacturer-dashboard" element={<ManufacturerDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

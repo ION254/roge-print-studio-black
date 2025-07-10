@@ -26,7 +26,16 @@ const AuthPage = () => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate('/');
+        // Check URL params for redirect
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirect = urlParams.get('redirect');
+        const from = urlParams.get('from');
+        
+        if (redirect === 'manufacturers' && from === 'manufacturers') {
+          navigate('/manufacturers?from=auth');
+        } else {
+          navigate('/');
+        }
       }
     };
     checkUser();
@@ -53,7 +62,16 @@ const AuthPage = () => {
 
       if (data.user) {
         toast.success('Welcome back!');
-        navigate('/');
+        // Check URL params for redirect after login
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirect = urlParams.get('redirect');
+        const from = urlParams.get('from');
+        
+        if (redirect === 'manufacturers' && from === 'manufacturers') {
+          navigate('/manufacturers?from=auth');
+        } else {
+          navigate('/');
+        }
       }
     } catch (error) {
       toast.error('An unexpected error occurred. Please try again.');
@@ -99,7 +117,16 @@ const AuthPage = () => {
 
       if (data.user) {
         toast.success('Account created successfully! You can now start designing.');
-        navigate('/');
+        // Check URL params for redirect after signup
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirect = urlParams.get('redirect');
+        const from = urlParams.get('from');
+        
+        if (redirect === 'manufacturers' && from === 'manufacturers') {
+          navigate('/manufacturers?from=auth');
+        } else {
+          navigate('/');
+        }
       }
     } catch (error) {
       toast.error('An unexpected error occurred. Please try again.');
