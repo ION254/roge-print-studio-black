@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Template } from '@/hooks/useTemplates';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -26,18 +26,15 @@ export const Templates: React.FC<TemplatesProps> = ({
   };
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[40vh] flex flex-col"> {/* Reduced height to 40vh */}
-        <DrawerHeader className="text-left flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <DrawerTitle className="text-2xl">Templates</DrawerTitle>
-            <DrawerClose />
-          </div>
-        </DrawerHeader>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="text-2xl text-center">Choose Your Template</DialogTitle>
+        </DialogHeader>
         <ScrollArea className="flex-1 overflow-y-auto px-4">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 pb-8"> {/* Increased columns, reduced gap */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pb-8">
             {templates.map((template) => (
-              <Card key={template.id} className="overflow-hidden">
+              <Card key={template.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleTemplateClick(template)}>
                 <div className="aspect-square relative">
                   <img 
                     src={template.thumbnail} 
@@ -45,13 +42,16 @@ export const Templates: React.FC<TemplatesProps> = ({
                     className="object-cover w-full h-full"
                   />
                 </div>
-                <CardContent className="py-2"> {/* Reduced padding */}
-                  <h3 className="font-medium text-center text-sm">{template.name}</h3> {/* Reduced text size */}
+                <CardContent className="py-3">
+                  <h3 className="font-medium text-center text-sm">{template.name}</h3>
                 </CardContent>
-                <CardFooter className="pb-2">
+                <CardFooter className="pb-3 pt-0">
                   <Button 
-                    onClick={() => handleTemplateClick(template)}
-                    className="w-full text-sm py-1" /* Smaller button */
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleTemplateClick(template);
+                    }}
+                    className="w-full text-sm"
                     size="sm"
                   >
                     Use Template
@@ -61,7 +61,7 @@ export const Templates: React.FC<TemplatesProps> = ({
             ))}
           </div>
         </ScrollArea>
-      </DrawerContent>
-    </Drawer>
+      </DialogContent>
+    </Dialog>
   );
 };

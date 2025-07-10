@@ -55,7 +55,8 @@ export const DesignCanvas: React.FC = () => {
   
   useEffect(() => {
     const cleanup = initCanvas(canvasRef);
-    // setIsTemplateDrawerOpen(true); // User can open it via toolbar
+    // Auto-open templates when the canvas is initialized
+    setIsTemplateDrawerOpen(true);
     return () => {
       if (typeof cleanup === 'function') {
         cleanup();
