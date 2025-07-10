@@ -10,10 +10,11 @@ import { useCanvasImage } from '@/hooks/useCanvasImage';
 import { useTemplates } from '@/hooks/useTemplates';
 import { Templates } from './Templates';
 import { ShapeLibrary } from './ShapeLibrary';
+import { SuggestedDesigns, SuggestedDesign } from './SuggestedDesigns';
 import { ThreeDView } from './ThreeDView';
 import { Measurements } from './Measurements';
 import { toast } from 'sonner';
-import { Group, FabricObject } from 'fabric';
+import { Group, FabricObject, Textbox, Rect, Circle } from 'fabric';
 
 // Extend FabricObject to include custom properties
 interface CustomFabricObject extends FabricObject {
@@ -42,6 +43,7 @@ export const DesignCanvas: React.FC = () => {
   const [selectedPrintingMethod, setSelectedPrintingMethod] = useState<string>('dtg');
   const [activeMockupObject, setActiveMockupObject] = useState<CustomFabricObject | CustomGroup | null>(null);
   const [isShapeLibraryOpen, setIsShapeLibraryOpen] = useState<boolean>(false);
+  const [isSuggestedDesignsOpen, setIsSuggestedDesignsOpen] = useState<boolean>(false);
   
   const { fabricCanvas, initCanvas } = useDesignCanvas();
   const { addShape, addEmblem } = useCanvasShapes(fabricCanvas);
@@ -121,7 +123,7 @@ export const DesignCanvas: React.FC = () => {
 
   const handleOpenSuggestedDesigns = () => {
     setActiveTool('suggested-designs');
-    toast.info("Suggested Designs opened (placeholder functionality).");
+    setIsSuggestedDesignsOpen(true);
   };
 
   const handleOpenTemplates = () => {
@@ -170,6 +172,56 @@ export const DesignCanvas: React.FC = () => {
   const handlePrintingMethodSelect = (method: string) => {
     setSelectedPrintingMethod(method);
     console.log('Printing method selected:', method);
+  };
+
+  const handleSuggestedDesignSelect = (design: SuggestedDesign, mode: 'add' | 'replace') => {
+    if (!fabricCanvas) return;
+
+    if (mode === 'replace') {
+      // Clear existing design elements but keep mockup
+      const activeTemplate = templates.find(t => currentMockup && (currentMockup as CustomFabricObject).name === `${t.productType}_mockup`);
+      if (activeTemplate && currentMockup) {
+        fabricCanvas.getObjects().forEach(obj => {
+          if (obj !== currentMockup) {
+            fabricCanvas.remove(obj);
+          }
+        });
+      }
+    }
+
+    // Apply the suggested design elements
+    design.elements.forEach((element) => {
+      let fabricObject: FabricObject | null = null;
+
+      if (element.type === 'text') {
+        fabricObject = new Textbox(element.content, {
+          left: element.position.x,
+          top: element.position.y,
+          ...element.style
+        });
+      } else if (element.type === 'shape') {
+        if (element.content === 'rectangle') {
+          fabricObject = new Rect({
+            left: element.position.x,
+            top: element.position.y,
+            ...element.style
+          });
+        } else if (element.content === 'circle') {
+          fabricObject = new Circle({
+            left: element.position.x,
+            top: element.position.y,
+            ...element.style
+          });
+        }
+      }
+
+      if (fabricObject) {
+        fabricCanvas.add(fabricObject);
+      }
+    });
+
+    fabricCanvas.renderAll();
+    toast.success(`${design.name} ${mode === 'add' ? 'added to' : 'applied to'} canvas!`);
   };
 
   return (
@@ -229,6 +281,12 @@ export const DesignCanvas: React.FC = () => {
         open={isShapeLibraryOpen}
         onOpenChange={setIsShapeLibraryOpen}
         onEmblemSelect={handleEmblemSelect}
+      />
+
+      <SuggestedDesigns
+        open={isSuggestedDesignsOpen}
+        onOpenChange={setIsSuggestedDesignsOpen}
+        onDesignSelect={handleSuggestedDesignSelect}
       />
     </div>
   );
