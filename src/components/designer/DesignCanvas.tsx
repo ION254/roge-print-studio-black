@@ -9,6 +9,7 @@ import { useCanvasText } from '@/hooks/useCanvasText';
 import { useCanvasImage } from '@/hooks/useCanvasImage';
 import { useTemplates } from '@/hooks/useTemplates';
 import { Templates } from './Templates';
+import { ShapeLibrary } from './ShapeLibrary';
 import { ThreeDView } from './ThreeDView';
 import { Measurements } from './Measurements';
 import { toast } from 'sonner';
@@ -40,9 +41,10 @@ export const DesignCanvas: React.FC = () => {
   const [activeTool, setActiveTool] = useState<ActiveTool>('select');
   const [selectedPrintingMethod, setSelectedPrintingMethod] = useState<string>('dtg');
   const [activeMockupObject, setActiveMockupObject] = useState<CustomFabricObject | CustomGroup | null>(null);
+  const [isShapeLibraryOpen, setIsShapeLibraryOpen] = useState<boolean>(false);
   
   const { fabricCanvas, initCanvas } = useDesignCanvas();
-  const { addShape } = useCanvasShapes(fabricCanvas);
+  const { addShape, addEmblem } = useCanvasShapes(fabricCanvas);
   const { addText } = useCanvasText(fabricCanvas);
   const { handleImageUpload } = useCanvasImage(fabricCanvas);
 
@@ -107,7 +109,14 @@ export const DesignCanvas: React.FC = () => {
 
   const handleOpenShapeLibrary = () => {
     setActiveTool('shape-library');
-    toast.info("Shape Library opened (placeholder functionality).");
+    setIsShapeLibraryOpen(true);
+  };
+
+  const handleEmblemSelect = (emblem: any) => {
+    if (fabricCanvas) {
+      addEmblem(emblem, drawingColor);
+      toast.success(`${emblem.name} added to canvas!`);
+    }
   };
 
   const handleOpenSuggestedDesigns = () => {
@@ -214,6 +223,12 @@ export const DesignCanvas: React.FC = () => {
         onOpenChange={setIsTemplateDrawerOpen}
         templates={templates}
         onTemplateSelect={(template) => applyTemplate(template)} // Pass current mockupColor for initial application
+      />
+
+      <ShapeLibrary
+        open={isShapeLibraryOpen}
+        onOpenChange={setIsShapeLibraryOpen}
+        onEmblemSelect={handleEmblemSelect}
       />
     </div>
   );
