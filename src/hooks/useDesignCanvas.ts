@@ -25,6 +25,15 @@ export const useDesignCanvas = (): FabricCanvasHook => {
       preserveObjectStacking: true,
     });
     
+    // Initialize the freeDrawingBrush properly
+    if (canvasInstance.freeDrawingBrush) {
+      canvasInstance.freeDrawingBrush.color = '#000000';
+      canvasInstance.freeDrawingBrush.width = 3;
+      console.log('Drawing brush initialized:', canvasInstance.freeDrawingBrush);
+    } else {
+      console.warn('FreeDrawingBrush not available on canvas instance');
+    }
+    
     setFabricCanvas(canvasInstance);
 
     const handleResize = () => {
