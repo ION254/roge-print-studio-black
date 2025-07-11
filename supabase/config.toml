@@ -1,1 +1,28 @@
 project_id = "kusbedyhecwoskwcfgpe"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[auth]
+enabled = true
+port = 54324
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://kusbedyhecwoskwcfgpe.supabase.co"]
+jwt_expiry = 3600
+refresh_token_rotation_enabled = true
+security_update_password_require_reauthentication = true
+enable_signup = true
+
+[db]
+port = 54322
+
+[edge_functions]
+enabled = true
+port = 54323
+
+[functions.award-roge-coins]
+verify_jwt = false

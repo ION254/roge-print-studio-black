@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, Edit3, UploadCloud, Coins, Store, ArrowRight } from 'lucide-react';
+import { User, Edit3, UploadCloud, Coins, Store, ArrowRight, Wallet, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
@@ -19,6 +19,9 @@ import {
   DialogTrigger 
 } from "@/components/ui/dialog";
 import { toast } from 'sonner';
+import WithdrawalModal from '@/components/wallet/WithdrawalModal';
+import TransactionHistory from '@/components/wallet/TransactionHistory';
+import { useRogeBalance } from '@/hooks/useRogeBalance';
 
 // Define the structure for a saved design
 interface SavedDesign {
@@ -42,7 +45,9 @@ interface ResellerApplication {
 const ProfilePage = () => {
   // User data state
   const [username, setUsername] = useState("CreativeUser123");
-  const [rogeCoinBalance] = useState(1250);
+  
+  // Blockchain-based Roge coin balance
+  const { totalBalance, availableBalance, pendingWithdrawals, isLoading: balanceLoading, refetchBalance } = useRogeBalance();
   
   // Saved designs state
   const [savedDesigns, setSavedDesigns] = useState<SavedDesign[]>([]);
@@ -60,6 +65,7 @@ const ProfilePage = () => {
   
   // Dialog state
   const [isResellerDialogOpen, setIsResellerDialogOpen] = useState(false);
+  const [isWithdrawalModalOpen, setIsWithdrawalModalOpen] = useState(false);
   
   // Load saved designs from localStorage on component mount
   useEffect(() => {
@@ -189,23 +195,61 @@ const ProfilePage = () => {
 
           {/* Roge Coin, Saved Designs, and Reseller Sections */}
           <div className="md:col-span-2 space-y-8">
-            {/* Roge Coin Balance */}
-            <div className="bg-card p-6 rounded-lg shadow-lg">
-              <h3 className="text-xl font-semibold text-foreground mb-4 flex items-center">
-                <Coins className="mr-2 h-5 w-5 text-primary" />
-                Roge Coin Balance
-              </h3>
-              <p className="text-4xl font-bold text-primary">{rogeCoinBalance.toLocaleString()} RC</p>
-              <p className="text-muted-foreground mt-2">Earn coins when others use your public designs!</p>
-              <Button variant="link" className="px-0">Learn more about Roge Coins</Button>
+            {/* Blockchain-Based Roge Coin Balance */}
+            <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 rounded-lg shadow-lg border border-primary/20">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-semibold text-foreground flex items-center">
+                  <Coins className="mr-2 h-5 w-5 text-primary" />
+                  Blockchain Wallet
+                </h3>
+                <Button 
+                  onClick={() => setIsWithdrawalModalOpen(true)}
+                  disabled={availableBalance <= 0 || balanceLoading}
+                  className="gap-2"
+                >
+                  <Wallet className="h-4 w-4" />
+                  Withdraw
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div className="text-center p-4 bg-card/50 rounded-lg border">
+                  <p className="text-2xl font-bold text-primary">
+                    {balanceLoading ? '...' : totalBalance.toLocaleString()} RC
+                  </p>
+                  <p className="text-sm text-muted-foreground">Total Balance</p>
+                </div>
+                <div className="text-center p-4 bg-card/50 rounded-lg border">
+                  <p className="text-2xl font-bold text-green-600">
+                    {balanceLoading ? '...' : availableBalance.toLocaleString()} RC
+                  </p>
+                  <p className="text-sm text-muted-foreground">Available</p>
+                </div>
+                <div className="text-center p-4 bg-card/50 rounded-lg border">
+                  <p className="text-2xl font-bold text-yellow-600">
+                    {balanceLoading ? '...' : pendingWithdrawals.toLocaleString()} RC
+                  </p>
+                  <p className="text-sm text-muted-foreground">Pending</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <TrendingUp className="h-4 w-4" />
+                <span>Earn coins when others use your public designs on the blockchain!</span>
+              </div>
             </div>
 
-            {/* Tabs for Designs and Reseller */}
-            <Tabs defaultValue="designs" className="bg-card p-6 rounded-lg shadow-lg">
+            {/* Tabs for Wallet, Designs, and Reseller */}
+            <Tabs defaultValue="wallet" className="bg-card p-6 rounded-lg shadow-lg">
               <TabsList className="mb-6">
+                <TabsTrigger value="wallet">Transaction History</TabsTrigger>
                 <TabsTrigger value="designs">My Saved Designs</TabsTrigger>
                 <TabsTrigger value="reseller">Reseller Applications</TabsTrigger>
               </TabsList>
+              
+              <TabsContent value="wallet">
+                <TransactionHistory currentBalance={totalBalance} />
+              </TabsContent>
               
               <TabsContent value="designs">
                 {savedDesigns.length > 0 ? (
@@ -377,6 +421,16 @@ const ProfilePage = () => {
             </Tabs>
           </div>
         </div>
+        
+        {/* Withdrawal Modal */}
+        <WithdrawalModal 
+          isOpen={isWithdrawalModalOpen}
+          onClose={() => {
+            setIsWithdrawalModalOpen(false);
+            refetchBalance(); // Refresh balance when modal closes
+          }}
+          currentBalance={availableBalance}
+        />
       </main>
       <Footer />
     </div>

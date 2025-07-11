@@ -137,15 +137,149 @@ export type Database = {
         }
         Relationships: []
       }
+      roge_transactions: {
+        Row: {
+          amount: number
+          blockchain_tx_hash: string | null
+          created_at: string
+          description: string | null
+          id: string
+          reference_id: string | null
+          transaction_type: Database["public"]["Enums"]["transaction_type"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          blockchain_tx_hash?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          reference_id?: string | null
+          transaction_type: Database["public"]["Enums"]["transaction_type"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          blockchain_tx_hash?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          reference_id?: string | null
+          transaction_type?: Database["public"]["Enums"]["transaction_type"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_wallets: {
+        Row: {
+          created_at: string
+          id: string
+          is_default: boolean | null
+          is_verified: boolean | null
+          network: Database["public"]["Enums"]["blockchain_network"]
+          updated_at: string
+          user_id: string
+          wallet_address: string
+          wallet_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_default?: boolean | null
+          is_verified?: boolean | null
+          network: Database["public"]["Enums"]["blockchain_network"]
+          updated_at?: string
+          user_id: string
+          wallet_address: string
+          wallet_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_default?: boolean | null
+          is_verified?: boolean | null
+          network?: Database["public"]["Enums"]["blockchain_network"]
+          updated_at?: string
+          user_id?: string
+          wallet_address?: string
+          wallet_name?: string | null
+        }
+        Relationships: []
+      }
+      withdrawal_requests: {
+        Row: {
+          amount: number
+          blockchain_tx_hash: string | null
+          created_at: string
+          final_amount: number | null
+          id: string
+          network: Database["public"]["Enums"]["blockchain_network"]
+          network_fee: number | null
+          notes: string | null
+          processed_at: string | null
+          status: Database["public"]["Enums"]["withdrawal_status"] | null
+          updated_at: string
+          user_id: string
+          wallet_address: string
+        }
+        Insert: {
+          amount: number
+          blockchain_tx_hash?: string | null
+          created_at?: string
+          final_amount?: number | null
+          id?: string
+          network: Database["public"]["Enums"]["blockchain_network"]
+          network_fee?: number | null
+          notes?: string | null
+          processed_at?: string | null
+          status?: Database["public"]["Enums"]["withdrawal_status"] | null
+          updated_at?: string
+          user_id: string
+          wallet_address: string
+        }
+        Update: {
+          amount?: number
+          blockchain_tx_hash?: string | null
+          created_at?: string
+          final_amount?: number | null
+          id?: string
+          network?: Database["public"]["Enums"]["blockchain_network"]
+          network_fee?: number | null
+          notes?: string | null
+          processed_at?: string | null
+          status?: Database["public"]["Enums"]["withdrawal_status"] | null
+          updated_at?: string
+          user_id?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_pending_withdrawals: {
+        Args: { user_uuid: string }
+        Returns: number
+      }
+      get_user_roge_balance: {
+        Args: { user_uuid: string }
+        Returns: number
+      }
     }
     Enums: {
-      [_ in never]: never
+      blockchain_network: "TRC20" | "ERC20" | "ETH" | "BTC"
+      transaction_type: "earned" | "spent" | "withdrawn" | "bonus" | "referral"
+      withdrawal_status:
+        | "pending"
+        | "processing"
+        | "completed"
+        | "failed"
+        | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -272,6 +406,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      blockchain_network: ["TRC20", "ERC20", "ETH", "BTC"],
+      transaction_type: ["earned", "spent", "withdrawn", "bonus", "referral"],
+      withdrawal_status: [
+        "pending",
+        "processing",
+        "completed",
+        "failed",
+        "cancelled",
+      ],
+    },
   },
 } as const
