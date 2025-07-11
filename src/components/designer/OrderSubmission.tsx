@@ -201,15 +201,31 @@ export const OrderSubmission: React.FC<OrderSubmissionProps> = ({
 
           <div>
             <Label>Order Details</Label>
-            <div className="bg-muted p-4 rounded-lg space-y-2 text-sm">
+            <div className="bg-muted p-4 rounded-lg space-y-4 text-sm">
               <div><strong>Product Type:</strong> {productType}</div>
-              <div><strong>Measurements:</strong></div>
-              <div className="grid grid-cols-2 gap-2 pl-4">
-                {Object.entries(measurements).map(([key, value]) => (
-                  <div key={key}>
-                    {key.replace(/([A-Z])/g, ' $1').toLowerCase()}: {value}cm
+              
+              {fabricCanvas && (
+                <div>
+                  <strong>Design Preview:</strong>
+                  <div className="mt-2 border rounded overflow-hidden bg-white">
+                    <img 
+                      src={fabricCanvas.toDataURL({ format: 'png', quality: 0.8, multiplier: 0.5 })} 
+                      alt="Design preview" 
+                      className="w-full h-32 object-contain"
+                    />
                   </div>
-                ))}
+                </div>
+              )}
+              
+              <div>
+                <strong>Measurements:</strong>
+                <div className="grid grid-cols-2 gap-2 pl-4 mt-1">
+                  {Object.entries(measurements).map(([key, value]) => (
+                    <div key={key}>
+                      {key.replace(/([A-Z])/g, ' $1').toLowerCase()}: {value}cm
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

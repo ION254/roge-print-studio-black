@@ -14,7 +14,7 @@ import { SuggestedDesigns, SuggestedDesign } from './SuggestedDesigns';
 import { ThreeDView } from './ThreeDView';
 import { Measurements } from './Measurements';
 import { toast } from 'sonner';
-import { Group, FabricObject, Textbox, Rect, Circle } from 'fabric';
+import { Group, FabricObject, Textbox, Rect, Circle, Canvas as FabricCanvas } from 'fabric';
 
 // Extend FabricObject to include custom properties
 interface CustomFabricObject extends FabricObject {
@@ -35,7 +35,17 @@ interface CustomGroup extends Group {
   name?: string;
 }
 
-export const DesignCanvas: React.FC = () => {
+interface DesignCanvasProps {
+  onCanvasReady?: (canvas: FabricCanvas | null) => void;
+  onMeasurementsChange?: (measurements: Record<string, number>) => void;
+  onProductTypeChange?: (productType: string) => void;
+}
+
+export const DesignCanvas: React.FC<DesignCanvasProps> = ({
+  onCanvasReady,
+  onMeasurementsChange,
+  onProductTypeChange
+}) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [drawingColor, setDrawingColor] = useState<string>('#000000'); // For drawing, shapes, text
   const [mockupColor, setMockupColor] = useState<string>('#cccccc'); // For mockup base color
@@ -67,6 +77,13 @@ export const DesignCanvas: React.FC = () => {
       }
     };
   }, [initCanvas]);
+  
+  // Notify parent when canvas is ready
+  useEffect(() => {
+    if (onCanvasReady) {
+      onCanvasReady(fabricCanvas);
+    }
+  }, [fabricCanvas, onCanvasReady]);
   
   useCanvasDrawing(
     fabricCanvas, 
@@ -166,6 +183,9 @@ export const DesignCanvas: React.FC = () => {
 
   const handleMeasurementsChange = (measurements: Record<string, number>) => {
     console.log('Measurements updated:', measurements);
+    if (onMeasurementsChange) {
+      onMeasurementsChange(measurements);
+    }
     toast.info("Measurements updated!");
   };
 
@@ -274,7 +294,12 @@ export const DesignCanvas: React.FC = () => {
         open={isTemplateDrawerOpen}
         onOpenChange={setIsTemplateDrawerOpen}
         templates={templates}
-        onTemplateSelect={(template) => applyTemplate(template)} // Pass current mockupColor for initial application
+        onTemplateSelect={(template) => {
+          applyTemplate(template);
+          if (onProductTypeChange) {
+            onProductTypeChange(template.productType);
+          }
+        }}
       />
 
       <ShapeLibrary
