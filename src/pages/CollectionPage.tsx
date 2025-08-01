@@ -5,47 +5,53 @@ import Footer from '@/components/layout/Footer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import signatureTeeImage from '@/assets/collection-signature-tee.jpg';
+import artisanHoodieImage from '@/assets/collection-artisan-hoodie.jpg';
+import innovatorCapImage from '@/assets/collection-innovator-cap.jpg';
+import explorerJacketImage from '@/assets/collection-explorer-jacket.jpg';
+import creatorToteImage from '@/assets/collection-creator-tote.jpg';
+import varsityJacketImage from '@/assets/collection-varsity-jacket.jpg';
 
 const collectionItems = [
   { 
     id: 1, 
     name: "Roge Signature Tee", 
-    imageUrl: "https://placehold.co/600x400/1a202c/ffffff?text=Signature+Tee", 
+    imageUrl: signatureTeeImage, 
     description: "Our classic tee, embodying minimalist style and comfort. Made with 100% organic cotton.",
     price: "$29.99"
   },
   { 
     id: 2, 
     name: "Roge Artisan Hoodie", 
-    imageUrl: "https://placehold.co/600x400/2d3748/ffffff?text=Artisan+Hoodie", 
+    imageUrl: artisanHoodieImage, 
     description: "A premium hoodie featuring a unique handcrafted design. Perfect for a stylish, relaxed look.",
     price: "$59.99"
   },
   { 
     id: 3, 
     name: "The Innovator Cap", 
-    imageUrl: "https://placehold.co/600x400/4a5568/ffffff?text=Innovator+Cap", 
+    imageUrl: innovatorCapImage, 
     description: "Sleek and modern, this cap is designed for the forward-thinkers. Adjustable fit.",
     price: "$24.99"
   },
    { 
     id: 4, 
     name: "Urban Explorer Jacket", 
-    imageUrl: "https://placehold.co/600x400/718096/ffffff?text=Explorer+Jacket", 
+    imageUrl: explorerJacketImage, 
     description: "Lightweight and versatile jacket for all your urban adventures. Water-resistant.",
     price: "$89.99"
   },
   { 
     id: 5, 
     name: "Canvas Creator Tote", 
-    imageUrl: "https://placehold.co/600x400/a0aec0/000000?text=Creator+Tote", 
+    imageUrl: creatorToteImage, 
     description: "Durable canvas tote bag, spacious enough for all your creative essentials.",
     price: "$34.99"
   },
   { 
     id: 6, 
     name: "Visionary Varsity Jacket", 
-    imageUrl: "https://placehold.co/600x400/cbd5e0/000000?text=Varsity+Jacket", 
+    imageUrl: varsityJacketImage, 
     description: "A modern take on the classic varsity jacket, for those who lead with vision.",
     price: "$129.99"
   },
