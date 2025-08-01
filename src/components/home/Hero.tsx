@@ -1,15 +1,16 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom'; // Import Link
+import { Link } from 'react-router-dom';
+import heroPrintingWorkshop from '@/assets/hero-printing-workshop.jpg';
 
 const Hero = () => {
   return (
     <div className="relative bg-gray-800 text-white min-h-[70vh] flex items-center justify-center">
       {/* Background image */}
       <div
-        className="absolute inset-0 bg-cover bg-center opacity-40"
-        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80')" }}
+        className="absolute inset-0 bg-cover bg-center opacity-50"
+        style={{ backgroundImage: `url(${heroPrintingWorkshop})` }}
       ></div>
       <div className="relative z-10 text-center p-8">
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 leading-tight">

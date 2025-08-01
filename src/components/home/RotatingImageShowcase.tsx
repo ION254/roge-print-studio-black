@@ -9,13 +9,18 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import showcaseCollection1 from '@/assets/showcase-collection-1.jpg';
+import showcasePrintingProcess from '@/assets/showcase-printing-process.jpg';
+import showcaseTeamUniforms from '@/assets/showcase-team-uniforms.jpg';
+import showcaseEmbroidery from '@/assets/showcase-embroidery.jpg';
+import showcasePromotionalItems from '@/assets/showcase-promotional-items.jpg';
 
 const images = [
-  { src: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80", alt: "Model wearing custom apparel 1" },
-  { src: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80", alt: "Model wearing custom apparel 2" },
-  { src: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80", alt: "Model wearing custom apparel 3" },
-  { src: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80", alt: "Group fashion shot" },
-  { src: "https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80", alt: "Model in modern outfit" },
+  { src: showcaseCollection1, alt: "Collection of custom printed apparel showcasing quality and variety" },
+  { src: showcasePrintingProcess, alt: "Screen printing process in action showing professional equipment" },
+  { src: showcaseTeamUniforms, alt: "Team wearing matching custom printed company uniforms" },
+  { src: showcaseEmbroidery, alt: "Custom embroidery machine working on detailed logo design" },
+  { src: showcasePromotionalItems, alt: "Various custom printed promotional items and marketing materials" },
 ];
 
 const RotatingImageShowcase = () => {

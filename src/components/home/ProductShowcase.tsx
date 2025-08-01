@@ -1,24 +1,27 @@
 
 import React from 'react';
 import ProductCard from './ProductCard';
+import customTshirtMockup from '@/assets/custom-tshirt-mockup.jpg';
+import customHoodieMockup from '@/assets/custom-hoodie-mockup.jpg';
+import customCapMockup from '@/assets/custom-cap-mockup.jpg';
 
 const products = [
   {
     title: 'Custom T-Shirts',
     description: 'High-quality cotton t-shirts, perfect for events, teams, or personal style. Variety of colors and sizes.',
-    imageUrl: 'https://placehold.co/600x400/cccccc/333333?text=T-Shirt+Mockup',
+    imageUrl: customTshirtMockup,
     link: '#tshirts',
   },
   {
     title: 'Personalized Hoodies',
     description: 'Comfortable and stylish hoodies. Ideal for groups, merchandise, or everyday wear. Print or embroidery.',
-    imageUrl: 'https://placehold.co/600x400/cccccc/333333?text=Hoodie+Mockup',
+    imageUrl: customHoodieMockup,
     link: '#hoodies',
   },
   {
     title: 'Branded Caps & Hats',
     description: 'Custom caps and hats for your brand, team, or event. Various styles available.',
-    imageUrl: 'https://placehold.co/600x400/cccccc/333333?text=Cap+Mockup',
+    imageUrl: customCapMockup,
     link: '#caps',
   },
 ];
