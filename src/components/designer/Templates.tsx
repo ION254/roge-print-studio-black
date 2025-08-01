@@ -46,7 +46,7 @@ export const Templates: React.FC<TemplatesProps> = ({
       onClick={() => handleTemplateClick(template)}
       title={template.name}
     >
-      <div className="w-20 h-20 relative overflow-hidden bg-muted rounded-md border border-border hover:border-primary/50 transition-colors">
+      <div className="w-24 h-24 relative overflow-hidden bg-muted rounded-md border border-border hover:border-primary/50 transition-colors">
         <img 
           src={template.thumbnail} 
           alt={template.name}
@@ -90,7 +90,7 @@ export const Templates: React.FC<TemplatesProps> = ({
 
           <ScrollArea className="flex-1 px-3 relative z-0">
             <TabsContent value={selectedCategory} className="mt-0 relative">
-              <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-1 pb-4 relative z-0">
+              <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-7 xl:grid-cols-9 gap-1 pb-4 relative z-0">
                 {filteredTemplates.map((template) => (
                   <TemplateCard key={template.id} template={template} />
                 ))}
