@@ -52,48 +52,48 @@ export const Templates: React.FC<TemplatesProps> = ({
           className="object-cover w-full h-full transform-gpu transition-transform duration-300 group-hover:scale-[1.02]"
         />
         {template.popular && (
-          <Badge className="absolute top-2 right-2 bg-yellow-500 text-yellow-900 hover:bg-yellow-500 z-20">
-            <Star className="w-3 h-3 mr-1" />
+          <Badge className="absolute top-1 right-1 bg-yellow-500 text-yellow-900 hover:bg-yellow-500 z-20 text-xs px-1 py-0">
+            <Star className="w-2 h-2 mr-1" />
             Popular
           </Badge>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
       </div>
       
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-1 px-2 pt-2">
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">
+            <h3 className="font-semibold text-xs group-hover:text-primary transition-colors line-clamp-1">
               {template.name}
             </h3>
-            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
               {template.description}
             </p>
           </div>
         </div>
       </CardHeader>
 
-      <CardContent className="pt-0 pb-3">
-        <div className="flex items-center gap-2 mb-3">
-          <Palette className="w-3 h-3 text-muted-foreground" />
-          <div className="flex gap-1">
-            {template.availableColors.slice(0, 4).map((color, index) => (
+      <CardContent className="pt-0 pb-2 px-2">
+        <div className="flex items-center gap-1 mb-2">
+          <Palette className="w-2 h-2 text-muted-foreground" />
+          <div className="flex gap-0.5">
+            {template.availableColors.slice(0, 3).map((color, index) => (
               <div
                 key={index}
-                className="w-3 h-3 rounded-full border border-border"
+                className="w-2 h-2 rounded-full border border-border"
                 style={{ backgroundColor: color }}
               />
             ))}
-            {template.availableColors.length > 4 && (
-              <span className="text-xs text-muted-foreground">+{template.availableColors.length - 4}</span>
+            {template.availableColors.length > 3 && (
+              <span className="text-xs text-muted-foreground ml-1">+{template.availableColors.length - 3}</span>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-1 mb-3">
-          <Tag className="w-3 h-3 text-muted-foreground" />
-          <div className="flex flex-wrap gap-1">
-            {template.tags.slice(0, 2).map((tag, index) => (
+        <div className="flex items-center gap-1">
+          <Tag className="w-2 h-2 text-muted-foreground" />
+          <div className="flex flex-wrap gap-0.5">
+            {template.tags.slice(0, 1).map((tag, index) => (
               <Badge key={index} variant="secondary" className="text-xs px-1 py-0">
                 {tag}
               </Badge>
@@ -102,13 +102,13 @@ export const Templates: React.FC<TemplatesProps> = ({
         </div>
       </CardContent>
 
-      <CardFooter className="pt-0">
+      <CardFooter className="pt-0 px-2 pb-2">
         <Button 
           onClick={(e) => {
             e.stopPropagation();
             handleTemplateClick(template);
           }}
-          className="w-full text-sm"
+          className="w-full text-xs h-7"
           size="sm"
         >
           Use Template
@@ -143,7 +143,7 @@ export const Templates: React.FC<TemplatesProps> = ({
 
           <ScrollArea className="flex-1 px-4 relative z-0">
             <TabsContent value={selectedCategory} className="mt-0 relative">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-8 relative z-0">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 pb-8 relative z-0">
                 {filteredTemplates.map((template) => (
                   <TemplateCard key={template.id} template={template} />
                 ))}
