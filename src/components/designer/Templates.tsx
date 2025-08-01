@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Template } from '@/hooks/useTemplates';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -42,22 +42,22 @@ export const Templates: React.FC<TemplatesProps> = ({
   const TemplateCard = ({ template }: { template: Template }) => (
     <Card 
       key={template.id} 
-      className="group overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer border-muted hover:border-primary/50" 
+      className="group overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer border-muted hover:border-primary/50 relative z-10" 
       onClick={() => handleTemplateClick(template)}
     >
-      <div className="aspect-square relative overflow-hidden">
+      <div className="aspect-square relative overflow-hidden bg-muted">
         <img 
           src={template.thumbnail} 
           alt={template.name}
-          className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+          className="object-cover w-full h-full transform-gpu transition-transform duration-300 group-hover:scale-[1.02]"
         />
         {template.popular && (
-          <Badge className="absolute top-2 right-2 bg-yellow-500 text-yellow-900 hover:bg-yellow-500">
+          <Badge className="absolute top-2 right-2 bg-yellow-500 text-yellow-900 hover:bg-yellow-500 z-20">
             <Star className="w-3 h-3 mr-1" />
             Popular
           </Badge>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
       </div>
       
       <CardHeader className="pb-2">
@@ -119,16 +119,19 @@ export const Templates: React.FC<TemplatesProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[85vh] flex flex-col">
+      <DialogContent className="max-w-6xl max-h-[85vh] flex flex-col z-50 bg-background">
         <DialogHeader>
           <DialogTitle className="text-2xl text-center flex items-center justify-center gap-2">
             <Palette className="w-6 h-6" />
             Choose Your Template
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Select a template to start designing your custom product
+          </DialogDescription>
         </DialogHeader>
 
         <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="flex-1 flex flex-col">
-          <TabsList className="grid w-full grid-cols-auto mx-4 mb-4">
+          <TabsList className="flex w-full mx-4 mb-4 overflow-x-auto bg-muted">
             <TabsTrigger value="all">All Templates</TabsTrigger>
             <TabsTrigger value="popular">Popular</TabsTrigger>
             {categories.map(category => (
@@ -138,9 +141,9 @@ export const Templates: React.FC<TemplatesProps> = ({
             ))}
           </TabsList>
 
-          <ScrollArea className="flex-1 px-4">
-            <TabsContent value={selectedCategory} className="mt-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-8">
+          <ScrollArea className="flex-1 px-4 relative z-0">
+            <TabsContent value={selectedCategory} className="mt-0 relative">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-8 relative z-0">
                 {filteredTemplates.map((template) => (
                   <TemplateCard key={template.id} template={template} />
                 ))}
