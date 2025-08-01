@@ -1,48 +1,61 @@
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { View, AlertCircle } from 'lucide-react';
+import { View, Loader2 } from 'lucide-react';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, PerspectiveCamera, Environment } from '@react-three/drei';
+import ProductModel3D from './ProductModel3D';
 
 interface ThreeDViewProps {
   canvasData?: string;
   productType?: 't-shirt' | 'hoodie' | 'cap' | 'general' | string;
 }
 
-const MockupPreview: React.FC<{ productType?: string }> = ({ productType }) => {
-  const productColors: Record<string, string> = {
-    't-shirt': '#e0e0e0',
-    'hoodie': '#d0d0d0', 
-    'cap': '#c0c0c0',
-    'general': '#f0f0f0'
-  };
-
-  const productColor = productColors[productType || 'general'] || productColors.general;
-
+const Scene3D: React.FC<{ canvasData?: string; productType?: string }> = ({ canvasData, productType }) => {
   return (
-    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-      <div className="text-center">
-        <div 
-          className="w-32 h-40 mx-auto mb-4 rounded-lg shadow-lg transform rotate-y-12"
-          style={{ 
-            backgroundColor: productColor,
-            boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-            transform: 'perspective(300px) rotateY(15deg)'
-          }}
-        />
-        <h3 className="text-lg font-medium text-gray-700">
-          {productType ? productType.charAt(0).toUpperCase() + productType.slice(1) : 'Product'} Preview
-        </h3>
-        <p className="text-sm text-gray-500 mt-2">
-          3D rendering temporarily unavailable
-        </p>
-        <p className="text-xs text-gray-400 mt-1">
-          Showing simplified mockup
-        </p>
-      </div>
-    </div>
+    <>
+      <PerspectiveCamera makeDefault position={[0, 0, 3]} />
+      <OrbitControls 
+        enablePan={true}
+        enableZoom={true}
+        enableRotate={true}
+        maxDistance={6}
+        minDistance={1.5}
+        autoRotate={false}
+      />
+      
+      {/* Lighting */}
+      <ambientLight intensity={0.6} />
+      <directionalLight
+        position={[5, 5, 5]}
+        intensity={0.8}
+        castShadow
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
+      />
+      <pointLight position={[-5, -5, -5]} intensity={0.3} />
+      
+      {/* Environment for reflections */}
+      <Environment preset="studio" />
+      
+      {/* Product Model */}
+      <ProductModel3D 
+        productType={productType || 'general'} 
+        canvasData={canvasData}
+      />
+    </>
   );
 };
+
+const LoadingFallback: React.FC = () => (
+  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted">
+    <div className="text-center">
+      <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+      <p className="text-sm text-muted-foreground">Loading 3D preview...</p>
+    </div>
+  </div>
+);
 
 export const ThreeDView: React.FC<ThreeDViewProps> = ({ canvasData, productType }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -55,18 +68,26 @@ export const ThreeDView: React.FC<ThreeDViewProps> = ({ canvasData, productType 
           3D Preview
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[700px] h-[500px]">
+      <DialogContent className="sm:max-w-[800px] h-[600px]">
         <DialogHeader>
           <DialogTitle>
             3D Preview - {productType ? productType.charAt(0).toUpperCase() + productType.slice(1) : 'Item'}
           </DialogTitle>
           <DialogDescription>
-            Preview your design in a simplified 3D view.
+            Interactive 3D preview of your design. Click and drag to rotate, scroll to zoom.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="flex-1 rounded-md overflow-hidden">
-          <MockupPreview productType={productType} />
+        <div className="flex-1 rounded-md overflow-hidden bg-gradient-to-br from-background to-muted/20">
+          <Suspense fallback={<LoadingFallback />}>
+            <Canvas 
+              shadows 
+              gl={{ antialias: true, alpha: true }}
+              style={{ background: 'transparent' }}
+            >
+              <Scene3D canvasData={canvasData} productType={productType} />
+            </Canvas>
+          </Suspense>
         </div>
       </DialogContent>
     </Dialog>
