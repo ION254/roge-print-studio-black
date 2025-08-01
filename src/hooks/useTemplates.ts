@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Canvas as FabricCanvas, Group, Rect, FabricObject, Path, loadSVGFromString, util } from 'fabric';
+import { Canvas as FabricCanvas, Group, Rect, FabricObject, FabricImage } from 'fabric';
 import { toast } from 'sonner';
 import tshirtBasicImage from '@/assets/template-tshirt-basic.jpg';
 import hoodieClassicImage from '@/assets/template-hoodie-classic.jpg';
@@ -356,50 +356,64 @@ export const useTemplates = (
       fabricCanvas.backgroundColor = '#ffffff';
     }
 
-    if (template.productType === 'general' || !template.svgString) {
+    if (template.productType === 'general') {
       toast.info(`Switched to ${template.name}. Canvas is blank and ready for your creativity!`);
       fabricCanvas.renderAll();
       setIsTemplateDrawerOpen(false);
       return;
     }
 
-    // For now, create a more sophisticated mockup using the template color scheme
-    const templateRect = new Rect({
-      left: fabricCanvas.width ? fabricCanvas.width / 2 - 150 : 50,
-      top: fabricCanvas.height ? fabricCanvas.height / 2 - 150 : 50,
-      width: 300,
-      height: 300,
-      fill: template.availableColors[0] || activeColor,
-      stroke: template.availableColors[1] || '#000',
-      strokeWidth: 2,
-      rx: template.productType === 'cap' ? 50 : 10,
-      ry: template.productType === 'cap' ? 50 : 10,
-      selectable: true,
-      hasControls: true,
-    });
-    
-    // Add custom properties using Object.assign to avoid TypeScript issues
-    const customMockup = Object.assign(templateRect, {
-      data: { 
-        isMockup: true, 
-        productType: template.productType,
-        templateId: template.id,
-        designAreas: template.designAreas
-      },
-      name: `${template.productType}_mockup`,
-      id: 'product_body'
-    }) as CustomFabricObject;
-    
-    fabricCanvas.add(customMockup);
-    fabricCanvas.centerObject(customMockup);
-    customMockup.setCoords();
-    fabricCanvas.setActiveObject(customMockup);
-    fabricCanvas.renderAll();
-    
-    setCurrentMockup(customMockup);
-    setActiveMockupObject(customMockup);
+    // Load actual product image instead of SVG shapes
+    FabricImage.fromURL(template.thumbnail, {
+      crossOrigin: 'anonymous'
+    }).then((productImage) => {
+      // Scale the image to fit nicely on canvas
+      const maxWidth = fabricCanvas.width ? fabricCanvas.width * 0.6 : 400;
+      const maxHeight = fabricCanvas.height ? fabricCanvas.height * 0.7 : 500;
+      
+      const imageWidth = productImage.width || 300;
+      const imageHeight = productImage.height || 300;
+      
+      const scaleX = maxWidth / imageWidth;
+      const scaleY = maxHeight / imageHeight;
+      const scale = Math.min(scaleX, scaleY, 1); // Don't scale up, only down
+      
+      productImage.set({
+        scaleX: scale,
+        scaleY: scale,
+        selectable: true,
+        hasControls: true,
+        hasBorders: true,
+        left: fabricCanvas.width ? fabricCanvas.width / 2 - (imageWidth * scale) / 2 : 50,
+        top: fabricCanvas.height ? fabricCanvas.height / 2 - (imageHeight * scale) / 2 : 50,
+      });
 
-    toast.success(`Applied ${template.name} template! Design area is ready for your creativity.`);
+      // Add custom properties for mockup identification
+      const customMockup = Object.assign(productImage, {
+        data: { 
+          isMockup: true, 
+          productType: template.productType,
+          templateId: template.id,
+          designAreas: template.designAreas
+        },
+        name: `${template.productType}_mockup`,
+        id: 'product_body'
+      }) as CustomFabricObject;
+      
+      fabricCanvas.add(customMockup);
+      fabricCanvas.centerObject(customMockup);
+      customMockup.setCoords();
+      fabricCanvas.setActiveObject(customMockup);
+      fabricCanvas.renderAll();
+      
+      setCurrentMockup(customMockup);
+      setActiveMockupObject(customMockup);
+
+      toast.success(`Applied ${template.name} template! Realistic product mockup loaded.`);
+    }).catch((error) => {
+      console.error('Failed to load product image:', error);
+      toast.error('Failed to load product template. Please try again.');
+    });
     
     setIsTemplateDrawerOpen(false);
   };
