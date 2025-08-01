@@ -91,7 +91,7 @@ export const DesignCanvas: React.FC<DesignCanvasProps> = ({
     drawingColor // Use drawingColor for free drawing
   );
 
-  // Update mockup color when mockupColor state changes using the new changeMockupColor function
+  // Update mockup color when mockupColor state changes
   useEffect(() => {
     if (currentMockup && changeMockupColor) {
       changeMockupColor(mockupColor);
