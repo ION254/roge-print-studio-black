@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Canvas as FabricCanvas, Group, Rect, FabricObject, FabricImage } from 'fabric';
+import { Canvas as FabricCanvas, Group, Rect, FabricObject, loadSVGFromString, util } from 'fabric';
 import { toast } from 'sonner';
 import tshirtBasicImage from '@/assets/template-tshirt-basic.jpg';
 import hoodieClassicImage from '@/assets/template-hoodie-classic.jpg';
@@ -14,6 +14,9 @@ interface CustomFabricObject extends FabricObject {
   data?: {
     isMockup?: boolean;
     productType?: string;
+    templateId?: string;
+    designAreas?: Template['designAreas'];
+    availableColors?: string[];
   };
   id?: string;
   name?: string;
@@ -23,6 +26,9 @@ interface CustomGroup extends Group {
   data?: {
     isMockup?: boolean;
     productType?: string;
+    templateId?: string;
+    designAreas?: Template['designAreas'];
+    availableColors?: string[];
   };
   id?: string;
   name?: string;
@@ -52,43 +58,22 @@ export interface Template {
   tags: string[];
 }
 
-// Enhanced realistic SVG templates with 3D effects
+// Flat, simple SVG mockups for easy color customization
 const T_SHIRT_BASIC_SVG = `<svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="tshirt-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#f8f9fa;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#e9ecef;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#dee2e6;stop-opacity:1" />
-    </linearGradient>
-    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-      <feDropShadow dx="2" dy="4" stdDeviation="3" flood-opacity="0.3"/>
-    </filter>
-  </defs>
-  <g id="tshirt-group" filter="url(#shadow)">
+  <g id="tshirt-group">
     <path id="product_body" d="M75 80 L75 95 L65 105 L65 120 L55 130 L55 260 L245 260 L245 130 L235 120 L235 105 L225 95 L225 80 L210 80 L210 70 Q200 50 180 50 L120 50 Q100 50 90 70 L90 80 Z" 
-          fill="url(#tshirt-gradient)" stroke="#adb5bd" stroke-width="1"/>
-    <path d="M90 70 Q100 60 120 60 L180 60 Q200 60 210 70" fill="none" stroke="#6c757d" stroke-width="0.5" opacity="0.6"/>
-    <rect id="design-area" x="100" y="120" width="100" height="80" fill="none" stroke="#007bff" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
+          fill="TEMPLATE_COLOR" stroke="#e5e7eb" stroke-width="1"/>
+    <rect id="design-area" x="100" y="120" width="100" height="80" fill="none" stroke="#3b82f6" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
   </g>
 </svg>`;
 
 const HOODIE_CLASSIC_SVG = `<svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="hoodie-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#6c757d;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#495057;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#343a40;stop-opacity:1" />
-    </linearGradient>
-    <filter id="hoodie-shadow" x="-50%" y="-50%" width="200%" height="200%">
-      <feDropShadow dx="2" dy="4" stdDeviation="4" flood-opacity="0.4"/>
-    </filter>
-  </defs>
-  <g id="hoodie-group" filter="url(#hoodie-shadow)">
+  <g id="hoodie-group">
     <path id="product_body" d="M60 90 L60 105 L50 115 L50 130 L40 140 L40 270 L260 270 L260 140 L250 130 L250 115 L240 105 L240 90 L220 90 L220 75 Q210 45 180 45 L120 45 Q90 45 80 75 L80 90 Z" 
-          fill="url(#hoodie-gradient)" stroke="#212529" stroke-width="1"/>
-    <ellipse cx="150" cy="65" rx="25" ry="15" fill="#212529" opacity="0.3"/>
-    <rect x="120" y="180" width="60" height="25" rx="5" fill="#212529" opacity="0.2"/>
-    <rect id="design-area" x="110" y="120" width="80" height="70" fill="none" stroke="#007bff" stroke-width="1" stroke-dasharray="3,3" opacity="0.7"/>
+          fill="TEMPLATE_COLOR" stroke="#e5e7eb" stroke-width="1"/>
+    <ellipse cx="150" cy="65" rx="25" ry="15" fill="#4b5563" opacity="0.3"/>
+    <rect x="120" y="180" width="60" height="25" rx="5" fill="#4b5563" opacity="0.2"/>
+    <rect id="design-area" x="110" y="120" width="80" height="70" fill="none" stroke="#3b82f6" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
   </g>
 </svg>`;
 
@@ -340,6 +325,59 @@ export const useTemplates = (
   const [isTemplateDrawerOpen, setIsTemplateDrawerOpen] = useState(false);
   const [currentMockup, setCurrentMockup] = useState<CustomFabricObject | CustomGroup | null>(null);
 
+  const changeMockupColor = (color: string) => {
+    if (!fabricCanvas || !currentMockup || !currentMockup.data?.templateId) return;
+    
+    const template = templates.find(t => t.id === currentMockup.data?.templateId);
+    if (!template || !template.svgString) return;
+
+    // Create a new SVG with the new color
+    const coloredSvg = template.svgString.replace('TEMPLATE_COLOR', color);
+    
+    // Store current position and scale
+    const currentLeft = currentMockup.left;
+    const currentTop = currentMockup.top;
+    const currentScaleX = currentMockup.scaleX;
+    const currentScaleY = currentMockup.scaleY;
+    
+    loadSVGFromString(coloredSvg).then((result) => {
+      const newSvgObject = util.groupSVGElements(result.objects, result.options);
+      
+      // Apply the same position and scale
+      newSvgObject.set({
+        left: currentLeft,
+        top: currentTop,
+        scaleX: currentScaleX,
+        scaleY: currentScaleY,
+        selectable: true,
+        hasControls: true,
+        hasBorders: true,
+      });
+
+      // Add the same custom properties
+      const newCustomMockup = Object.assign(newSvgObject, {
+        data: currentMockup.data,
+        name: currentMockup.name,
+        id: currentMockup.id
+      }) as CustomFabricObject;
+      
+      // Replace the old mockup with the new colored one
+      fabricCanvas.remove(currentMockup);
+      fabricCanvas.add(newCustomMockup);
+      newCustomMockup.setCoords();
+      fabricCanvas.setActiveObject(newCustomMockup);
+      fabricCanvas.renderAll();
+      
+      setCurrentMockup(newCustomMockup);
+      setActiveMockupObject(newCustomMockup);
+      
+      toast.success('Mockup color updated!');
+    }).catch((error) => {
+      console.error('Failed to change mockup color:', error);
+      toast.error('Failed to change color. Please try again.');
+    });
+  };
+
   const applyTemplate = (template: Template) => {
     if (!fabricCanvas) return;
 
@@ -363,38 +401,38 @@ export const useTemplates = (
       return;
     }
 
-    // Load actual product image instead of SVG shapes
-    FabricImage.fromURL(template.thumbnail, {
-      crossOrigin: 'anonymous'
-    }).then((productImage) => {
-      // Scale the image to fit nicely on canvas
-      const maxWidth = fabricCanvas.width ? fabricCanvas.width * 0.6 : 400;
-      const maxHeight = fabricCanvas.height ? fabricCanvas.height * 0.7 : 500;
+    // Use flat SVG mockups with dynamic color changing
+    if (!template.svgString) {
+      toast.error('Template SVG not available');
+      return;
+    }
+
+    // Replace the TEMPLATE_COLOR placeholder with the selected color
+    const coloredSvg = template.svgString.replace('TEMPLATE_COLOR', template.availableColors[0] || activeColor);
+    
+    loadSVGFromString(coloredSvg).then((result) => {
+      const svgObject = util.groupSVGElements(result.objects, result.options);
       
-      const imageWidth = productImage.width || 300;
-      const imageHeight = productImage.height || 300;
+      // Scale and position the SVG mockup
+      const maxSize = Math.min(fabricCanvas.width || 600, fabricCanvas.height || 600) * 0.6;
+      const scale = maxSize / 300; // SVGs are 300x300
       
-      const scaleX = maxWidth / imageWidth;
-      const scaleY = maxHeight / imageHeight;
-      const scale = Math.min(scaleX, scaleY, 1); // Don't scale up, only down
-      
-      productImage.set({
+      svgObject.set({
         scaleX: scale,
         scaleY: scale,
         selectable: true,
         hasControls: true,
         hasBorders: true,
-        left: fabricCanvas.width ? fabricCanvas.width / 2 - (imageWidth * scale) / 2 : 50,
-        top: fabricCanvas.height ? fabricCanvas.height / 2 - (imageHeight * scale) / 2 : 50,
       });
 
       // Add custom properties for mockup identification
-      const customMockup = Object.assign(productImage, {
+      const customMockup = Object.assign(svgObject, {
         data: { 
           isMockup: true, 
           productType: template.productType,
           templateId: template.id,
-          designAreas: template.designAreas
+          designAreas: template.designAreas,
+          availableColors: template.availableColors
         },
         name: `${template.productType}_mockup`,
         id: 'product_body'
@@ -409,10 +447,10 @@ export const useTemplates = (
       setCurrentMockup(customMockup);
       setActiveMockupObject(customMockup);
 
-      toast.success(`Applied ${template.name} template! Realistic product mockup loaded.`);
+      toast.success(`Applied ${template.name} template! Flat mockup ready for customization.`);
     }).catch((error) => {
-      console.error('Failed to load product image:', error);
-      toast.error('Failed to load product template. Please try again.');
+      console.error('Failed to load SVG template:', error);
+      toast.error('Failed to load template. Please try again.');
     });
     
     setIsTemplateDrawerOpen(false);
@@ -424,5 +462,6 @@ export const useTemplates = (
     setIsTemplateDrawerOpen,
     applyTemplate,
     currentMockup,
+    changeMockupColor,
   };
 };

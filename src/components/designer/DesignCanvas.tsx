@@ -61,7 +61,7 @@ export const DesignCanvas: React.FC<DesignCanvasProps> = ({
   const { handleImageUpload } = useCanvasImage(fabricCanvas);
 
   // Pass setActiveMockupObject and mockupColor to useTemplates
-  const { templates, isTemplateDrawerOpen, setIsTemplateDrawerOpen, applyTemplate, currentMockup } = useTemplates(
+  const { templates, isTemplateDrawerOpen, setIsTemplateDrawerOpen, applyTemplate, currentMockup, changeMockupColor } = useTemplates(
     fabricCanvas,
     setActiveMockupObject,
     mockupColor // Initial color for newly applied template
@@ -91,25 +91,12 @@ export const DesignCanvas: React.FC<DesignCanvasProps> = ({
     drawingColor // Use drawingColor for free drawing
   );
 
-  // Update mockup color when mockupColor state changes and a mockup is active
+  // Update mockup color when mockupColor state changes using the new changeMockupColor function
   useEffect(() => {
-    if (activeMockupObject && fabricCanvas && activeMockupObject.data?.isMockup) {
-      if (activeMockupObject instanceof Group) {
-        const mockupGroup = activeMockupObject as CustomGroup;
-        const productBody = mockupGroup.getObjects().find(obj => (obj as CustomFabricObject).id === 'product_body');
-        
-        if (productBody) {
-          productBody.set('fill', mockupColor);
-        } else if (mockupGroup.item(0)) { // Fallback
-          mockupGroup.item(0).set('fill', mockupColor);
-        }
-      } else {
-        // If it's a single object, update its fill directly
-        activeMockupObject.set('fill', mockupColor);
-      }
-      fabricCanvas.renderAll();
+    if (currentMockup && changeMockupColor) {
+      changeMockupColor(mockupColor);
     }
-  }, [mockupColor, activeMockupObject, fabricCanvas]);
+  }, [mockupColor, currentMockup, changeMockupColor]);
 
 
   const handleToolClick = (tool: Extract<ActiveTool, 'select' | 'draw' | 'rectangle' | 'circle'>) => {
