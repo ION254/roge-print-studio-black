@@ -41,7 +41,7 @@ export interface Template {
   category: string;
   description: string;
   thumbnail: string;
-  productType: 't-shirt' | 'hoodie' | 'cap' | 'tank-top' | 'long-sleeve' | 'general';
+  productType: 't-shirt' | 'hoodie' | 'cap' | 'tank-top' | 'long-sleeve' | 'general' | 'scrubs' | 'jumpsuit' | 'apron';
   svgString?: string;
   designAreas: {
     id: string;
@@ -217,6 +217,85 @@ const sampleTemplates: Template[] = [
     tags: ['cap', 'baseball', 'sport', 'casual', 'adjustable']
   },
   {
+    id: 'scrubs-hospital',
+    name: 'Hospital Scrubs',
+    category: 'Uniforms',
+    description: 'Professional medical scrubs with chest pocket area',
+    thumbnail: '/placeholder.svg',
+    productType: 'scrubs',
+    designAreas: [
+      {
+        id: 'chest',
+        name: 'Chest Pocket',
+        x: 120,
+        y: 140,
+        width: 80,
+        height: 60,
+        maxWidth: 100,
+        maxHeight: 80
+      }
+    ],
+    availableColors: ['#1992d3', '#2563eb', '#0f172a', '#16a34a', '#f8fafc'],
+    popular: false,
+    tags: ['scrubs', 'medical', 'professional', 'uniform']
+  },
+  {
+    id: 'jumpsuit-construction',
+    name: 'Construction Jumpsuit',
+    category: 'Workwear',
+    description: 'High-visibility construction workwear with chest panel',
+    thumbnail: '/placeholder.svg',
+    productType: 'jumpsuit',
+    designAreas: [
+      {
+        id: 'chest',
+        name: 'Chest Panel',
+        x: 110,
+        y: 120,
+        width: 80,
+        height: 70,
+        maxWidth: 100,
+        maxHeight: 90
+      },
+      {
+        id: 'back',
+        name: 'Back Panel',
+        x: 110,
+        y: 200,
+        width: 80,
+        height: 80,
+        maxWidth: 100,
+        maxHeight: 100
+      }
+    ],
+    availableColors: ['#f59e0b', '#fbbf24', '#0f172a', '#111827'],
+    popular: false,
+    tags: ['jumpsuit', 'construction', 'hi-viz', 'workwear', 'safety']
+  },
+  {
+    id: 'apron-kitchen',
+    name: 'Kitchen Apron',
+    category: 'Aprons',
+    description: 'Professional kitchen apron with center design area',
+    thumbnail: '/placeholder.svg',
+    productType: 'apron',
+    designAreas: [
+      {
+        id: 'chest',
+        name: 'Center Panel',
+        x: 130,
+        y: 150,
+        width: 70,
+        height: 90,
+        maxWidth: 90,
+        maxHeight: 110
+      }
+    ],
+    availableColors: ['#000000', '#ffffff', '#6b7280', '#b45309', '#ef4444'],
+    popular: false,
+    tags: ['apron', 'kitchen', 'chef', 'cooking', 'professional']
+  },
+  {
     id: 'general-blank',
     name: 'Blank Canvas',
     category: 'General',
@@ -258,7 +337,7 @@ export const useTemplates = (
       setActiveMockupObject(null);
     }
     
-    // Clear all objects
+    // Clear all objects (including any existing design area guides)
     fabricCanvas.clear();
     if (fabricCanvas.backgroundColor !== '#ffffff') {
       fabricCanvas.backgroundColor = '#ffffff';
@@ -302,7 +381,7 @@ export const useTemplates = (
         ry: 25
       });
     } else if (template.productType === 'cap') {
-      // Simple circle for cap mockup
+      // Simple rectangle for cap mockup
       mockupShape = new Rect({
         left: 120,
         top: 120,
@@ -313,6 +392,45 @@ export const useTemplates = (
         strokeWidth: 2,
         rx: 40,
         ry: 40
+      });
+    } else if (template.productType === 'scrubs') {
+      // Simple rectangle for scrubs mockup
+      mockupShape = new Rect({
+        left: 90,
+        top: 90,
+        width: 220,
+        height: 220,
+        fill: defaultColor,
+        stroke: '#e5e7eb',
+        strokeWidth: 2,
+        rx: 20,
+        ry: 20
+      });
+    } else if (template.productType === 'jumpsuit') {
+      // Taller rectangle for jumpsuit mockup
+      mockupShape = new Rect({
+        left: 100,
+        top: 70,
+        width: 200,
+        height: 320,
+        fill: defaultColor,
+        stroke: '#e5e7eb',
+        strokeWidth: 2,
+        rx: 15,
+        ry: 15
+      });
+    } else if (template.productType === 'apron') {
+      // Softer rectangle for apron mockup
+      mockupShape = new Rect({
+        left: 110,
+        top: 100,
+        width: 180,
+        height: 260,
+        fill: defaultColor,
+        stroke: '#e5e7eb',
+        strokeWidth: 2,
+        rx: 30,
+        ry: 30
       });
     } else {
       // Default rectangle
@@ -349,6 +467,31 @@ export const useTemplates = (
     fabricCanvas.centerObject(customMockup);
     customMockup.setCoords();
     fabricCanvas.setActiveObject(customMockup);
+
+    // Add design area guides (dashed outlines)
+    template.designAreas.forEach((area) => {
+      const designGuide = new Rect({
+        left: area.x,
+        top: area.y,
+        width: area.width,
+        height: area.height,
+        fill: 'transparent',
+        stroke: '#94a3b8',
+        strokeWidth: 1,
+        strokeDashArray: [6, 6],
+        selectable: false,
+        evented: false,
+        excludeFromExport: true
+      });
+      
+      Object.assign(designGuide, {
+        name: 'design_area_overlay',
+        id: `design_area_${area.id}`
+      });
+      
+      fabricCanvas.add(designGuide);
+    });
+    
     fabricCanvas.renderAll();
     
     setCurrentMockup(customMockup);

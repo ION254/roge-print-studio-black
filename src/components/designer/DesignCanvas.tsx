@@ -247,9 +247,24 @@ export const DesignCanvas: React.FC<DesignCanvasProps> = ({
           onPrintingMethodSelect={handlePrintingMethodSelect}
         />
         <div className="flex items-center gap-4">
-          <div>
+          <div className="flex flex-col gap-1">
             <label htmlFor="mockup-color-picker" className="text-xs text-muted-foreground">Mockup Color</label>
-            <ColorPicker color={mockupColor} onChange={setMockupColor} />
+            <div className="flex items-center gap-2">
+              <ColorPicker color={mockupColor} onChange={setMockupColor} />
+              {currentMockup?.data?.availableColors && (
+                <div className="flex gap-1">
+                  {currentMockup.data.availableColors.map((color) => (
+                    <button
+                      key={color}
+                      className="w-6 h-6 rounded border border-border hover:scale-110 transition-transform"
+                      style={{ backgroundColor: color }}
+                      onClick={() => setMockupColor(color)}
+                      title={`Set mockup color to ${color}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           <div>
             <label htmlFor="drawing-color-picker" className="text-xs text-muted-foreground">Drawing Color</label>
