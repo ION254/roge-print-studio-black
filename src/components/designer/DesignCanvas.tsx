@@ -1,7 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Toolbar, ActiveTool } from './Toolbar';
-import { ColorPicker } from './ColorPicker';
-import { CanvasActions } from './actions/CanvasActions';
 import { useDesignCanvas } from '@/hooks/useDesignCanvas';
 import { useCanvasDrawing } from '@/hooks/useCanvasDrawing';
 import { useCanvasShapes } from '@/hooks/useCanvasShapes';
@@ -15,6 +12,8 @@ import { ThreeDView } from './ThreeDView';
 import { Measurements } from './Measurements';
 import { toast } from 'sonner';
 import { Group, FabricObject, Textbox, Rect, Circle, Canvas as FabricCanvas } from 'fabric';
+
+export { type ActiveTool } from './Toolbar';
 
 // Extend FabricObject to include custom properties
 interface CustomFabricObject extends FabricObject {
@@ -39,18 +38,53 @@ interface DesignCanvasProps {
   onCanvasReady?: (canvas: FabricCanvas | null) => void;
   onMeasurementsChange?: (measurements: Record<string, number>) => void;
   onProductTypeChange?: (productType: string) => void;
+  activeTool?: string;
+  onToolChange?: (tool: string) => void;
+  drawingColor?: string;
+  mockupColor?: string;
+  onMockupColorChange?: (color: string) => void;
+  currentMockup?: any;
+}
+
+// Declare global window interface for design canvas API
+declare global {
+  interface Window {
+    designCanvasAPI?: {
+      handleToolClick: (tool: string) => void;
+      handleAddText: () => void;
+      handleImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
+      handleEmblemSelect: (emblem: any) => void;
+      handleSuggestedDesignSelect: (design: SuggestedDesign, mode: 'add' | 'replace') => void;
+      setIsShapeLibraryOpen: (open: boolean) => void;
+      setIsSuggestedDesignsOpen: (open: boolean) => void;
+      setIsTemplateDrawerOpen: (open: boolean) => void;
+      applyTemplate: (template: any) => void;
+      templates: any[];
+      currentMockup: any;
+    };
+  }
 }
 
 export const DesignCanvas: React.FC<DesignCanvasProps> = ({
   onCanvasReady,
   onMeasurementsChange,
-  onProductTypeChange
+  onProductTypeChange,
+  activeTool = 'select',
+  onToolChange,
+  drawingColor: externalDrawingColor,
+  mockupColor: externalMockupColor,
+  onMockupColorChange,
+  currentMockup: externalCurrentMockup
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [drawingColor, setDrawingColor] = useState<string>('#000000'); // For drawing, shapes, text
-  const [mockupColor, setMockupColor] = useState<string>('#cccccc'); // For mockup base color
-  const [activeTool, setActiveTool] = useState<ActiveTool>('select');
-  const [selectedPrintingMethod, setSelectedPrintingMethod] = useState<string>('dtg');
+  
+  // Use external state when provided, otherwise use internal state
+  const [internalDrawingColor, setInternalDrawingColor] = useState('#000000');
+  const [internalMockupColor, setInternalMockupColor] = useState('#cccccc');
+  const drawingColor = externalDrawingColor || internalDrawingColor;
+  const mockupColor = externalMockupColor || internalMockupColor;
+  const setMockupColor = onMockupColorChange || setInternalMockupColor;
+  
   const [activeMockupObject, setActiveMockupObject] = useState<CustomFabricObject | CustomGroup | null>(null);
   const [isShapeLibraryOpen, setIsShapeLibraryOpen] = useState<boolean>(false);
   const [isSuggestedDesignsOpen, setIsSuggestedDesignsOpen] = useState<boolean>(false);
@@ -64,12 +98,11 @@ export const DesignCanvas: React.FC<DesignCanvasProps> = ({
   const { templates, isTemplateDrawerOpen, setIsTemplateDrawerOpen, applyTemplate, currentMockup, changeMockupColor } = useTemplates(
     fabricCanvas,
     setActiveMockupObject,
-    mockupColor // Initial color for newly applied template
+    mockupColor
   );
   
   useEffect(() => {
     const cleanup = initCanvas(canvasRef);
-    // Auto-open templates when the canvas is initialized
     setIsTemplateDrawerOpen(true);
     return () => {
       if (typeof cleanup === 'function') {
@@ -78,7 +111,6 @@ export const DesignCanvas: React.FC<DesignCanvasProps> = ({
     };
   }, [initCanvas]);
   
-  // Notify parent when canvas is ready
   useEffect(() => {
     if (onCanvasReady) {
       onCanvasReady(fabricCanvas);
@@ -88,34 +120,25 @@ export const DesignCanvas: React.FC<DesignCanvasProps> = ({
   useCanvasDrawing(
     fabricCanvas, 
     activeTool === 'draw', 
-    drawingColor // Use drawingColor for free drawing
+    drawingColor
   );
 
-  // Update mockup color when mockupColor state changes
   useEffect(() => {
     if (currentMockup && changeMockupColor) {
       changeMockupColor(mockupColor);
     }
   }, [mockupColor, currentMockup, changeMockupColor]);
-
-
-  const handleToolClick = (tool: Extract<ActiveTool, 'select' | 'draw' | 'rectangle' | 'circle'>) => {
-    setActiveTool(tool);
+  const handleToolClick = (tool: string) => {
+    onToolChange?.(tool);
     if (fabricCanvas && (tool === 'rectangle' || tool === 'circle')) {
-      addShape(tool, drawingColor); // Use drawingColor for shapes
+      addShape(tool as any, drawingColor);
     }
   };
 
   const handleAddText = () => {
-    setActiveTool('text');
     if (fabricCanvas) {
-      addText(drawingColor); // Use drawingColor for text
+      addText(drawingColor);
     }
-  };
-
-  const handleOpenShapeLibrary = () => {
-    setActiveTool('shape-library');
-    setIsShapeLibraryOpen(true);
   };
 
   const handleEmblemSelect = (emblem: any) => {
@@ -125,67 +148,10 @@ export const DesignCanvas: React.FC<DesignCanvasProps> = ({
     }
   };
 
-  const handleOpenSuggestedDesigns = () => {
-    setActiveTool('suggested-designs');
-    setIsSuggestedDesignsOpen(true);
-  };
-
-  const handleOpenTemplates = () => {
-    setIsTemplateDrawerOpen(true);
-  };
-
-  const handleClearCanvas = () => {
-    if (fabricCanvas) {
-      // If there's a mockup, re-apply it (effectively clearing designs but not mockup itself)
-      // Otherwise, clear everything.
-      const activeTemplate = templates.find(t => currentMockup && (currentMockup as CustomFabricObject).name === `${t.productType}_mockup`);
-      if (activeTemplate && currentMockup) {
-          // Clear everything *except* the current mockup
-          fabricCanvas.getObjects().forEach(obj => {
-              if (obj !== currentMockup) {
-                  fabricCanvas.remove(obj);
-              }
-          });
-          // Reset mockup to its initial color if needed, or keep current mockupColor
-          if (currentMockup instanceof Group) {
-            const productBody = currentMockup.getObjects().find(o => (o as CustomFabricObject).id === 'product_body');
-            if (productBody) productBody.set('fill', mockupColor);
-            else if (currentMockup.item(0)) currentMockup.item(0).set('fill', mockupColor);
-           } else {
-             // currentMockup is a single fabric object
-             (currentMockup as CustomFabricObject).set('fill', mockupColor);
-           }
-
-      } else {
-          fabricCanvas.clear();
-          if (fabricCanvas.backgroundColor !== '#ffffff') {
-             fabricCanvas.backgroundColor = '#ffffff';
-          }
-          setActiveMockupObject(null); // No active mockup if fully cleared
-      }
-      fabricCanvas.renderAll();
-      toast.info("Canvas designs cleared!");
-    }
-  };
-
-  const handleMeasurementsChange = (measurements: Record<string, number>) => {
-    console.log('Measurements updated:', measurements);
-    if (onMeasurementsChange) {
-      onMeasurementsChange(measurements);
-    }
-    toast.info("Measurements updated!");
-  };
-
-  const handlePrintingMethodSelect = (method: string) => {
-    setSelectedPrintingMethod(method);
-    console.log('Printing method selected:', method);
-  };
-
   const handleSuggestedDesignSelect = (design: SuggestedDesign, mode: 'add' | 'replace') => {
     if (!fabricCanvas) return;
 
     if (mode === 'replace') {
-      // Clear existing design elements but keep mockup
       const activeTemplate = templates.find(t => currentMockup && (currentMockup as CustomFabricObject).name === `${t.productType}_mockup`);
       if (activeTemplate && currentMockup) {
         fabricCanvas.getObjects().forEach(obj => {
@@ -196,7 +162,6 @@ export const DesignCanvas: React.FC<DesignCanvasProps> = ({
       }
     }
 
-    // Apply the suggested design elements
     design.elements.forEach((element) => {
       let fabricObject: FabricObject | null = null;
 
@@ -231,67 +196,42 @@ export const DesignCanvas: React.FC<DesignCanvasProps> = ({
     toast.success(`${design.name} ${mode === 'add' ? 'added to' : 'applied to'} canvas!`);
   };
 
+  // Expose functions to parent for sidebar integration
+  useEffect(() => {
+    if (fabricCanvas) {
+      (window as any).designCanvasAPI = {
+        handleToolClick,
+        handleAddText,
+        handleImageUpload,
+        handleEmblemSelect,
+        handleSuggestedDesignSelect,
+        setIsShapeLibraryOpen,
+        setIsSuggestedDesignsOpen,
+        setIsTemplateDrawerOpen,
+        applyTemplate,
+        templates,
+        currentMockup: externalCurrentMockup || currentMockup
+      };
+    }
+  }, [fabricCanvas, templates, currentMockup, externalCurrentMockup]);
+
   return (
-    <div className="flex flex-col gap-4 w-full">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-2 border-b border-border">
-        <Toolbar 
-          activeTool={activeTool} 
-          onToolClick={handleToolClick}
-          onAddText={handleAddText}
-          onClear={handleClearCanvas}
-          onImageUpload={handleImageUpload}
-          onOpenShapeLibrary={handleOpenShapeLibrary}
-          onOpenSuggestedDesigns={handleOpenSuggestedDesigns}
-          onOpenTemplates={handleOpenTemplates}
-          fabricCanvas={fabricCanvas}
-          onPrintingMethodSelect={handlePrintingMethodSelect}
-        />
-        <div className="flex items-center gap-4">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="mockup-color-picker" className="text-xs text-muted-foreground">Mockup Color</label>
-            <div className="flex items-center gap-2">
-              <ColorPicker color={mockupColor} onChange={setMockupColor} />
-              {currentMockup?.data?.availableColors && (
-                <div className="flex gap-1">
-                  {currentMockup.data.availableColors.map((color) => (
-                    <button
-                      key={color}
-                      className="w-6 h-6 rounded border border-border hover:scale-110 transition-transform"
-                      style={{ backgroundColor: color }}
-                      onClick={() => setMockupColor(color)}
-                      title={`Set mockup color to ${color}`}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-          <div>
-            <label htmlFor="drawing-color-picker" className="text-xs text-muted-foreground">Drawing Color</label>
-            <ColorPicker color={drawingColor} onChange={setDrawingColor} />
-          </div>
-          {selectedPrintingMethod && (
-            <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded self-end mb-1">
-              {selectedPrintingMethod.toUpperCase()}
-            </span>
-          )}
-        </div>
-      </div>
-      <div className="w-full h-[600px] border border-input rounded-md shadow-lg overflow-hidden bg-white" style={{ minHeight: '600px' }}> 
-        <canvas ref={canvasRef} />
-      </div>
-      <div className="mt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex gap-2 flex-wrap">
-          {/* Pass current mockup data to 3D view if needed, or canvas data URL */}
-          <ThreeDView 
-            canvasData={fabricCanvas?.toDataURL({ format: 'png', quality: 0.8, multiplier: 1 })}
-            productType={activeMockupObject?.data?.productType}
-          />
-          <Measurements onMeasurementsChange={handleMeasurementsChange} />
-        </div>
-        <CanvasActions fabricCanvas={fabricCanvas} />
+    <div className="w-full h-full flex flex-col">
+      {/* Canvas Container */}
+      <div className="flex-1 border-2 border-border rounded-lg bg-muted/10 relative overflow-hidden">
+        <canvas ref={canvasRef} className="max-w-full block mx-auto" />
       </div>
 
+      {/* Bottom Panel */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+        <ThreeDView 
+          canvasData={fabricCanvas?.toDataURL({ format: 'png', quality: 0.8, multiplier: 1 })}
+          productType={activeMockupObject?.data?.productType}
+        />
+        <Measurements onMeasurementsChange={onMeasurementsChange || (() => {})} />
+      </div>
+
+      {/* Modals */}
       <Templates 
         open={isTemplateDrawerOpen}
         onOpenChange={setIsTemplateDrawerOpen}
