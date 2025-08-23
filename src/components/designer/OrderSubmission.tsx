@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -6,12 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Canvas as FabricCanvas } from 'fabric';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Send, Package, Clock, Calculator } from 'lucide-react';
+import { Send, Package, Clock, Calculator, RefreshCw, AlertCircle } from 'lucide-react';
 import { calculatePricing, formatKsh, kshToCents } from '@/lib/pricing';
 
 interface Manufacturer {
@@ -40,10 +41,13 @@ export const OrderSubmission: React.FC<OrderSubmissionProps> = ({
   const { user } = useAuth();
   const navigate = useNavigate();
   const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
+  const [manufacturersLoading, setManufacturersLoading] = useState(true);
+  const [manufacturersError, setManufacturersError] = useState<string>('');
   const [selectedManufacturer, setSelectedManufacturer] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(50);
   const [notes, setNotes] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Calculate pricing
   const pricing = useMemo(() => {
@@ -52,22 +56,74 @@ export const OrderSubmission: React.FC<OrderSubmissionProps> = ({
 
   useEffect(() => {
     fetchManufacturers();
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, []);
 
-  const fetchManufacturers = async () => {
+  const fetchManufacturers = async (retryCount = 0) => {
+    // Cancel previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
+    setManufacturersLoading(true);
+    setManufacturersError('');
+
     try {
-      const { data, error } = await supabase
+      // Primary query - verified manufacturers
+      let { data, error } = await supabase
         .from('manufacturers')
         .select('id, company_name, minimum_order_quantity, lead_time_days, specialties')
         .eq('is_verified', true)
-        .order('lead_time_days', { ascending: true });
+        .order('lead_time_days', { ascending: true })
+        .abortSignal(signal);
 
       if (error) throw error;
-      setManufacturers(data || []);
-    } catch (error) {
+
+      // If no verified manufacturers, try fallback query
+      if (!data || data.length === 0) {
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('manufacturers')
+          .select('id, company_name, minimum_order_quantity, lead_time_days, specialties')
+          .order('created_at', { ascending: false })
+          .limit(10)
+          .abortSignal(signal);
+
+        if (fallbackError) throw fallbackError;
+        data = fallbackData || [];
+      }
+
+      setManufacturers(data);
+      setManufacturersError('');
+    } catch (error: any) {
+      if (error.name === 'AbortError') return; // Request was cancelled
+
       console.error('Error fetching manufacturers:', error);
-      toast.error('Failed to load manufacturers');
+      
+      // Retry logic
+      if (retryCount < 2) {
+        setTimeout(() => {
+          fetchManufacturers(retryCount + 1);
+        }, 1000 * (retryCount + 1)); // Exponential backoff
+        return;
+      }
+
+      // Final error state
+      setManufacturersError('Failed to load manufacturers. Please check your connection and try again.');
+      setManufacturers([]);
+    } finally {
+      setManufacturersLoading(false);
     }
+  };
+
+  const retryFetchManufacturers = () => {
+    fetchManufacturers();
   };
 
   const handleSubmitOrder = async () => {
@@ -164,23 +220,63 @@ export const OrderSubmission: React.FC<OrderSubmissionProps> = ({
         <CardContent className="space-y-6">
           <div>
             <Label>Select Manufacturer *</Label>
-            <Select value={selectedManufacturer} onValueChange={setSelectedManufacturer}>
-              <SelectTrigger>
-                <SelectValue placeholder="Choose a manufacturer" />
-              </SelectTrigger>
-              <SelectContent>
-                {manufacturers.map((manufacturer) => (
-                  <SelectItem key={manufacturer.id} value={manufacturer.id}>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{manufacturer.company_name}</span>
-                      <span className="text-sm text-muted-foreground">
-                        Min: {manufacturer.minimum_order_quantity} units • {manufacturer.lead_time_days} days
-                      </span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {manufacturersLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-10 w-full" />
+                <div className="text-sm text-muted-foreground">Loading manufacturers...</div>
+              </div>
+            ) : manufacturersError ? (
+              <div className="space-y-2">
+                <div className="border border-destructive/50 bg-destructive/10 rounded-lg p-3">
+                  <div className="flex items-center gap-2 text-destructive mb-2">
+                    <AlertCircle className="h-4 w-4" />
+                    <span className="text-sm font-medium">Unable to load manufacturers</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-3">{manufacturersError}</p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={retryFetchManufacturers}
+                    className="h-8"
+                  >
+                    <RefreshCw className="h-3 w-3 mr-1" />
+                    Retry
+                  </Button>
+                </div>
+              </div>
+            ) : manufacturers.length === 0 ? (
+              <div className="border border-muted bg-muted/30 rounded-lg p-4 text-center">
+                <Package className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground">No verified manufacturers available</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={retryFetchManufacturers}
+                  className="mt-2 h-8"
+                >
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  Refresh
+                </Button>
+              </div>
+            ) : (
+              <Select value={selectedManufacturer} onValueChange={setSelectedManufacturer}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a manufacturer" />
+                </SelectTrigger>
+                <SelectContent>
+                  {manufacturers.map((manufacturer) => (
+                    <SelectItem key={manufacturer.id} value={manufacturer.id}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{manufacturer.company_name}</span>
+                        <span className="text-sm text-muted-foreground">
+                          Min: {manufacturer.minimum_order_quantity} units • {manufacturer.lead_time_days} days
+                        </span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
           {selectedManufacturerData && (
@@ -195,18 +291,18 @@ export const OrderSubmission: React.FC<OrderSubmissionProps> = ({
                     <Clock className="h-4 w-4" />
                     Lead Time: {selectedManufacturerData.lead_time_days} days
                   </div>
-                  {selectedManufacturerData.specialties.length > 0 && (
-                    <div>
-                      <p className="text-sm font-medium mb-1">Specialties:</p>
-                      <div className="flex flex-wrap gap-1">
-                        {selectedManufacturerData.specialties.map((specialty, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
-                            {specialty}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                   {selectedManufacturerData.specialties?.length > 0 && (
+                     <div>
+                       <p className="text-sm font-medium mb-1">Specialties:</p>
+                       <div className="flex flex-wrap gap-1">
+                         {selectedManufacturerData.specialties.map((specialty, index) => (
+                           <Badge key={index} variant="secondary" className="text-xs">
+                             {specialty}
+                           </Badge>
+                         ))}
+                       </div>
+                     </div>
+                   )}
                 </div>
               </CardContent>
             </Card>
@@ -323,11 +419,19 @@ export const OrderSubmission: React.FC<OrderSubmissionProps> = ({
           <div className="flex gap-4 pt-4">
             <Button
               onClick={handleSubmitOrder}
-              disabled={loading || !selectedManufacturer || (selectedManufacturerData && quantity < selectedManufacturerData.minimum_order_quantity)}
+              disabled={loading || manufacturersLoading || !selectedManufacturer || (selectedManufacturerData && quantity < selectedManufacturerData.minimum_order_quantity)}
               className="flex-1"
             >
               {loading ? 'Submitting...' : 'Submit Order'}
             </Button>
+            {(!selectedManufacturer && !manufacturersLoading && !manufacturersError) && (
+              <p className="text-xs text-muted-foreground mt-1">Select a manufacturer to continue</p>
+            )}
+            {(selectedManufacturerData && quantity < selectedManufacturerData.minimum_order_quantity) && (
+              <p className="text-xs text-destructive mt-1">
+                Quantity must be at least {selectedManufacturerData.minimum_order_quantity} units
+              </p>
+            )}
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
