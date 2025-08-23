@@ -10,6 +10,7 @@ import { Canvas as FabricCanvas } from 'fabric';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { Send, Package, Clock, Calculator } from 'lucide-react';
 import { calculatePricing, formatKsh, kshToCents } from '@/lib/pricing';
 
@@ -37,6 +38,7 @@ export const OrderSubmission: React.FC<OrderSubmissionProps> = ({
   onClose,
 }) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
   const [selectedManufacturer, setSelectedManufacturer] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(50);
@@ -124,14 +126,22 @@ export const OrderSubmission: React.FC<OrderSubmissionProps> = ({
         pricing_breakdown: pricing.breakdown as any
       };
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('orders')
-        .insert([orderData]);
+        .insert([orderData])
+        .select('id')
+        .single();
 
       if (error) throw error;
 
-      toast.success('Order submitted successfully! The manufacturer will be notified.');
+      toast.success('Order submitted successfully! Redirecting to your profile...');
       onClose();
+      navigate('/profile', { 
+        state: { 
+          openOrdersTab: true, 
+          newOrderId: data.id 
+        } 
+      });
     } catch (error) {
       console.error('Error submitting order:', error);
       toast.error('Failed to submit order');

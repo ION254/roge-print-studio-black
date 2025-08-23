@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, Edit3, UploadCloud, Coins, Store, ArrowRight, Wallet, TrendingUp } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { User, Edit3, UploadCloud, Coins, Store, ArrowRight, Wallet, TrendingUp, Package, Eye } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Dialog, 
@@ -21,7 +21,11 @@ import {
 import { toast } from 'sonner';
 import WithdrawalModal from '@/components/wallet/WithdrawalModal';
 import TransactionHistory from '@/components/wallet/TransactionHistory';
+import { OrderModal } from '@/components/orders/OrderModal';
 import { useRogeBalance } from '@/hooks/useRogeBalance';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { formatKsh } from '@/lib/pricing';
 
 // Define the structure for a saved design
 interface SavedDesign {
@@ -42,7 +46,30 @@ interface ResellerApplication {
   submittedAt: string;
 }
 
+// Define the structure for an order
+interface Order {
+  id: string;
+  customer_id: string;
+  design_data: any;
+  measurements: any;
+  quantity: number;
+  status: string;
+  product_type: string;
+  notes?: string;
+  created_at: string;
+  payment_status: string;
+  delivery_status: string;
+  shipping_address?: any;
+  shipping_final_cents: number;
+  total_cents: number;
+  tracking_number?: string;
+}
+
 const ProfilePage = () => {
+  const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  
   // User data state
   const [username, setUsername] = useState("CreativeUser123");
   
@@ -51,6 +78,11 @@ const ProfilePage = () => {
   
   // Saved designs state
   const [savedDesigns, setSavedDesigns] = useState<SavedDesign[]>([]);
+  
+  // Orders state
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   
   // Reseller applications state
   const [resellerApplications, setResellerApplications] = useState<ResellerApplication[]>([]);
@@ -67,6 +99,17 @@ const ProfilePage = () => {
   const [isResellerDialogOpen, setIsResellerDialogOpen] = useState(false);
   const [isWithdrawalModalOpen, setIsWithdrawalModalOpen] = useState(false);
   
+  // Get state from navigation (for redirect from order submission)
+  const locationState = location.state as { openOrdersTab?: boolean; newOrderId?: string } | null;
+  const [activeTab, setActiveTab] = useState(locationState?.openOrdersTab ? "orders" : "wallet");
+  
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!user) {
+      navigate('/auth');
+    }
+  }, [user, navigate]);
+
   // Load saved designs from localStorage on component mount
   useEffect(() => {
     const loadedDesigns = JSON.parse(localStorage.getItem('savedDesigns') || '[]');
@@ -76,6 +119,42 @@ const ProfilePage = () => {
     const loadedApplications = JSON.parse(localStorage.getItem('resellerApplications') || '[]');
     setResellerApplications(loadedApplications);
   }, []);
+
+  // Fetch user orders
+  useEffect(() => {
+    if (user) {
+      fetchOrders();
+    }
+  }, [user]);
+
+  // Handle opening new order if redirected from order submission
+  useEffect(() => {
+    if (locationState?.newOrderId && orders.length > 0) {
+      const newOrder = orders.find(order => order.id === locationState.newOrderId);
+      if (newOrder) {
+        setSelectedOrder(newOrder);
+        setIsOrderModalOpen(true);
+        // Clear the state to prevent reopening
+        navigate(location.pathname, { replace: true });
+      }
+    }
+  }, [locationState?.newOrderId, orders, navigate, location.pathname]);
+
+  const fetchOrders = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('customer_id', user!.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setOrders(data || []);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      toast.error('Failed to load orders');
+    }
+  };
   
   // Handle input changes for reseller application form
   const handleApplicationInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -239,14 +318,49 @@ const ProfilePage = () => {
               </div>
             </div>
 
-            {/* Tabs for Wallet, Designs, and Reseller */}
-            <Tabs defaultValue="wallet" className="bg-card p-6 rounded-lg shadow-lg">
+            {/* Tabs for Orders, Wallet, Designs, and Reseller */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="bg-card p-6 rounded-lg shadow-lg">
               <TabsList className="mb-6">
+                <TabsTrigger value="orders">My Orders</TabsTrigger>
                 <TabsTrigger value="wallet">Transaction History</TabsTrigger>
                 <TabsTrigger value="designs">My Saved Designs</TabsTrigger>
                 <TabsTrigger value="reseller">Reseller Applications</TabsTrigger>
               </TabsList>
               
+              <TabsContent value="orders">
+                {orders.length > 0 ? (
+                  <div className="space-y-4">
+                    {orders.map(order => (
+                      <div key={order.id} className="flex items-center justify-between p-4 border border-border rounded-md hover:bg-muted/50 transition-colors">
+                        <div className="flex items-center gap-4">
+                          <Package className="h-8 w-8 text-primary" />
+                          <div>
+                            <p className="font-medium">{order.product_type} - Qty: {order.quantity}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {formatKsh(order.total_cents / 100)} • Status: {order.status} • {new Date(order.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="gap-2"
+                          onClick={() => {
+                            setSelectedOrder(order);
+                            setIsOrderModalOpen(true);
+                          }}
+                        >
+                          <Eye className="h-4 w-4" />
+                          View Details
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">You haven't placed any orders yet. <Link to="/designer" className="text-primary hover:underline">Start creating!</Link></p>
+                )}
+              </TabsContent>
+
               <TabsContent value="wallet">
                 <TransactionHistory currentBalance={totalBalance} />
               </TabsContent>
@@ -421,18 +535,27 @@ const ProfilePage = () => {
             </Tabs>
           </div>
         </div>
-        
-        {/* Withdrawal Modal */}
-        <WithdrawalModal 
-          isOpen={isWithdrawalModalOpen}
-          onClose={() => {
-            setIsWithdrawalModalOpen(false);
-            refetchBalance(); // Refresh balance when modal closes
-          }}
-          currentBalance={availableBalance}
-        />
       </main>
       <Footer />
+      
+      {/* Order Modal */}
+      <OrderModal
+        order={selectedOrder}
+        isOpen={isOrderModalOpen}
+        onClose={() => {
+          setIsOrderModalOpen(false);
+          setSelectedOrder(null);
+        }}
+        isManufacturer={false}
+        onOrderUpdate={fetchOrders}
+      />
+
+      {/* Withdrawal Modal */}
+      <WithdrawalModal 
+        isOpen={isWithdrawalModalOpen} 
+        onClose={() => setIsWithdrawalModalOpen(false)}
+        currentBalance={availableBalance}
+      />
     </div>
   );
 };
