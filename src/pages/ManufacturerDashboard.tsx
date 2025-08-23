@@ -10,7 +10,9 @@ import { MapPin, Clock, Package, CheckCircle, Edit, Eye, Calendar, User } from '
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ManufacturerForm } from '@/components/manufacturers/ManufacturerForm';
+import { OrderModal } from '@/components/orders/OrderModal';
 import { useAuth } from '@/contexts/AuthContext';
+import { formatKsh } from '@/lib/pricing';
 
 interface Manufacturer {
   id: string;
@@ -38,6 +40,12 @@ interface Order {
   notes?: string;
   created_at: string;
   updated_at: string;
+  payment_status: string;
+  delivery_status: string;
+  shipping_address?: any;
+  shipping_final_cents: number;
+  total_cents: number;
+  tracking_number?: string;
 }
 
 const ManufacturerDashboard = () => {
@@ -45,7 +53,9 @@ const ManufacturerDashboard = () => {
   const navigate = useNavigate();
   const [manufacturer, setManufacturer] = useState<Manufacturer | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showEditForm, setShowEditForm] = useState(false);
+  const [showOrderModal, setShowOrderModal] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -70,7 +80,6 @@ const ManufacturerDashboard = () => {
       if (error) throw error;
       
       if (!data) {
-        // No manufacturer profile found, redirect to create one
         navigate('/manufacturers');
         return;
       }
@@ -88,7 +97,6 @@ const ManufacturerDashboard = () => {
     if (!user) return;
 
     try {
-      // First get the manufacturer ID
       const { data: manufacturerData, error: manufacturerError } = await supabase
         .from('manufacturers')
         .select('id')
@@ -98,7 +106,6 @@ const ManufacturerDashboard = () => {
       if (manufacturerError) throw manufacturerError;
       if (!manufacturerData) return;
 
-      // Then fetch orders assigned to this manufacturer
       const { data, error } = await supabase
         .from('orders')
         .select('*')
@@ -116,6 +123,16 @@ const ManufacturerDashboard = () => {
   const handleFormSuccess = () => {
     setShowEditForm(false);
     fetchManufacturerData();
+  };
+
+  const handleViewOrder = (order: Order) => {
+    setSelectedOrder(order);
+    setShowOrderModal(true);
+  };
+
+  const handleOrderUpdate = () => {
+    fetchOrders();
+    setShowOrderModal(false);
   };
 
   const getStatusColor = (status: string) => {
@@ -143,7 +160,7 @@ const ManufacturerDashboard = () => {
   }
 
   if (!manufacturer) {
-    return null; // Will redirect to manufacturers page
+    return null;
   }
 
   return (
@@ -176,6 +193,15 @@ const ManufacturerDashboard = () => {
               onCancel={() => setShowEditForm(false)}
             />
           )}
+
+          {/* Order Details Modal */}
+          <OrderModal
+            order={selectedOrder}
+            isOpen={showOrderModal}
+            onClose={() => setShowOrderModal(false)}
+            isManufacturer={true}
+            onOrderUpdate={handleOrderUpdate}
+          />
 
           <Tabs defaultValue="orders" className="space-y-6">
             <TabsList className="grid w-full grid-cols-3">
@@ -217,6 +243,9 @@ const ManufacturerDashboard = () => {
                                   <Badge className={getStatusColor(order.status)}>
                                     {order.status.replace('_', ' ').toUpperCase()}
                                   </Badge>
+                                  <Badge variant="outline">
+                                    {order.payment_status.toUpperCase()}
+                                  </Badge>
                                 </div>
                                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                                   <span className="flex items-center gap-1">
@@ -227,14 +256,22 @@ const ManufacturerDashboard = () => {
                                     <Calendar className="h-4 w-4" />
                                     {new Date(order.created_at).toLocaleDateString()}
                                   </span>
+                                  <span>
+                                    Total: {formatKsh(order.total_cents / 100)}
+                                  </span>
                                 </div>
                                 {order.notes && (
                                   <p className="text-sm text-muted-foreground">{order.notes}</p>
                                 )}
                               </div>
-                              <Button variant="outline" size="sm" className="gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="gap-2"
+                                onClick={() => handleViewOrder(order)}
+                              >
                                 <Eye className="h-4 w-4" />
-                                View Details
+                                View & Chat
                               </Button>
                             </div>
                           </CardContent>

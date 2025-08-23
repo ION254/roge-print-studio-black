@@ -68,29 +68,71 @@ export type Database = {
         }
         Relationships: []
       }
+      order_messages: {
+        Row: {
+          attachments: Json | null
+          created_at: string
+          id: string
+          message: string
+          order_id: string
+          sender_id: string
+        }
+        Insert: {
+          attachments?: Json | null
+          created_at?: string
+          id?: string
+          message: string
+          order_id: string
+          sender_id: string
+        }
+        Update: {
+          attachments?: Json | null
+          created_at?: string
+          id?: string
+          message?: string
+          order_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_messages_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           base_price_cents: number
           created_at: string
           currency: string
           customer_id: string
+          delivery_status: string
           design_coverage_adjustment_cents: number
           design_data: Json
           id: string
           manufacturer_id: string | null
           measurements: Json
           notes: string | null
+          paid_at: string | null
+          payment_status: string
           pricing_breakdown: Json | null
           printing_method: string | null
           printing_surcharge_cents: number
           product_type: string
           quantity: number
           quantity_discount_cents: number
+          shipping_address: Json | null
           shipping_cents: number
+          shipping_final_cents: number
           status: string
+          stripe_session_id: string | null
           subtotal_cents: number
           tax_cents: number
           total_cents: number
+          tracking_number: string | null
           updated_at: string
         }
         Insert: {
@@ -98,23 +140,30 @@ export type Database = {
           created_at?: string
           currency?: string
           customer_id: string
+          delivery_status?: string
           design_coverage_adjustment_cents?: number
           design_data: Json
           id?: string
           manufacturer_id?: string | null
           measurements: Json
           notes?: string | null
+          paid_at?: string | null
+          payment_status?: string
           pricing_breakdown?: Json | null
           printing_method?: string | null
           printing_surcharge_cents?: number
           product_type: string
           quantity?: number
           quantity_discount_cents?: number
+          shipping_address?: Json | null
           shipping_cents?: number
+          shipping_final_cents?: number
           status?: string
+          stripe_session_id?: string | null
           subtotal_cents?: number
           tax_cents?: number
           total_cents?: number
+          tracking_number?: string | null
           updated_at?: string
         }
         Update: {
@@ -122,23 +171,30 @@ export type Database = {
           created_at?: string
           currency?: string
           customer_id?: string
+          delivery_status?: string
           design_coverage_adjustment_cents?: number
           design_data?: Json
           id?: string
           manufacturer_id?: string | null
           measurements?: Json
           notes?: string | null
+          paid_at?: string | null
+          payment_status?: string
           pricing_breakdown?: Json | null
           printing_method?: string | null
           printing_surcharge_cents?: number
           product_type?: string
           quantity?: number
           quantity_discount_cents?: number
+          shipping_address?: Json | null
           shipping_cents?: number
+          shipping_final_cents?: number
           status?: string
+          stripe_session_id?: string | null
           subtotal_cents?: number
           tax_cents?: number
           total_cents?: number
+          tracking_number?: string | null
           updated_at?: string
         }
         Relationships: []
