@@ -7,10 +7,10 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "12.2.12 (cd3cf9e)"
   }
   public: {
     Tables: {
@@ -70,42 +70,75 @@ export type Database = {
       }
       orders: {
         Row: {
+          base_price_cents: number
           created_at: string
+          currency: string
           customer_id: string
+          design_coverage_adjustment_cents: number
           design_data: Json
           id: string
           manufacturer_id: string | null
           measurements: Json
           notes: string | null
+          pricing_breakdown: Json | null
+          printing_method: string | null
+          printing_surcharge_cents: number
           product_type: string
           quantity: number
+          quantity_discount_cents: number
+          shipping_cents: number
           status: string
+          subtotal_cents: number
+          tax_cents: number
+          total_cents: number
           updated_at: string
         }
         Insert: {
+          base_price_cents?: number
           created_at?: string
+          currency?: string
           customer_id: string
+          design_coverage_adjustment_cents?: number
           design_data: Json
           id?: string
           manufacturer_id?: string | null
           measurements: Json
           notes?: string | null
+          pricing_breakdown?: Json | null
+          printing_method?: string | null
+          printing_surcharge_cents?: number
           product_type: string
           quantity?: number
+          quantity_discount_cents?: number
+          shipping_cents?: number
           status?: string
+          subtotal_cents?: number
+          tax_cents?: number
+          total_cents?: number
           updated_at?: string
         }
         Update: {
+          base_price_cents?: number
           created_at?: string
+          currency?: string
           customer_id?: string
+          design_coverage_adjustment_cents?: number
           design_data?: Json
           id?: string
           manufacturer_id?: string | null
           measurements?: Json
           notes?: string | null
+          pricing_breakdown?: Json | null
+          printing_method?: string | null
+          printing_surcharge_cents?: number
           product_type?: string
           quantity?: number
+          quantity_discount_cents?: number
+          shipping_cents?: number
           status?: string
+          subtotal_cents?: number
+          tax_cents?: number
+          total_cents?: number
           updated_at?: string
         }
         Relationships: []

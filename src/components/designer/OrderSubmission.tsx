@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -10,7 +10,8 @@ import { Canvas as FabricCanvas } from 'fabric';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import { Send, Package, Clock } from 'lucide-react';
+import { Send, Package, Clock, Calculator } from 'lucide-react';
+import { calculatePricing, formatKsh, kshToCents } from '@/lib/pricing';
 
 interface Manufacturer {
   id: string;
@@ -24,6 +25,7 @@ interface OrderSubmissionProps {
   fabricCanvas: FabricCanvas | null;
   measurements: Record<string, number>;
   productType: string;
+  printingMethod?: string;
   onClose: () => void;
 }
 
@@ -31,6 +33,7 @@ export const OrderSubmission: React.FC<OrderSubmissionProps> = ({
   fabricCanvas,
   measurements,
   productType,
+  printingMethod = 'DTG',
   onClose,
 }) => {
   const { user } = useAuth();
@@ -39,6 +42,11 @@ export const OrderSubmission: React.FC<OrderSubmissionProps> = ({
   const [quantity, setQuantity] = useState<number>(50);
   const [notes, setNotes] = useState<string>('');
   const [loading, setLoading] = useState(false);
+
+  // Calculate pricing
+  const pricing = useMemo(() => {
+    return calculatePricing(productType, printingMethod, quantity);
+  }, [productType, printingMethod, quantity]);
 
   useEffect(() => {
     fetchManufacturers();
@@ -101,7 +109,19 @@ export const OrderSubmission: React.FC<OrderSubmissionProps> = ({
         product_type: productType,
         quantity,
         notes,
-        status: 'pending'
+        status: 'pending',
+        // Pricing fields
+        currency: pricing.currency,
+        printing_method: printingMethod,
+        base_price_cents: kshToCents(pricing.breakdown.basePrice),
+        printing_surcharge_cents: kshToCents(pricing.breakdown.printingSurcharge),
+        quantity_discount_cents: kshToCents(pricing.breakdown.quantityDiscount),
+        design_coverage_adjustment_cents: kshToCents(pricing.breakdown.designCoverageAdjustment),
+        subtotal_cents: kshToCents(pricing.breakdown.subtotal),
+        tax_cents: kshToCents(pricing.breakdown.tax),
+        shipping_cents: kshToCents(pricing.breakdown.shipping),
+        total_cents: kshToCents(pricing.breakdown.total),
+        pricing_breakdown: pricing.breakdown as any
       };
 
       const { error } = await supabase
@@ -229,6 +249,55 @@ export const OrderSubmission: React.FC<OrderSubmissionProps> = ({
               </div>
             </div>
           </div>
+
+          {/* Pricing Card */}
+          <Card className="bg-muted/30">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Calculator className="h-5 w-5" />
+                Pricing Estimate
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span>Base Price ({quantity} × {formatKsh(pricing.breakdown.basePrice / quantity)}):</span>
+                    <span>{formatKsh(pricing.breakdown.basePrice)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Printing ({printingMethod}):</span>
+                    <span>{formatKsh(pricing.breakdown.printingSurcharge)}</span>
+                  </div>
+                  {pricing.breakdown.quantityDiscount !== 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span>Quantity Discount:</span>
+                      <span>{formatKsh(pricing.breakdown.quantityDiscount)}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span>Tax:</span>
+                    <span>{formatKsh(pricing.breakdown.tax)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Shipping:</span>
+                    <span>{formatKsh(pricing.breakdown.shipping)}</span>
+                  </div>
+                  <div className="flex justify-between font-semibold text-lg pt-2 border-t">
+                    <span>Total:</span>
+                    <span className="text-primary">{formatKsh(pricing.breakdown.total)}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="text-xs text-muted-foreground mt-3 p-2 bg-muted/50 rounded">
+                <p>• Prices include {printingMethod} printing method</p>
+                <p>• Bulk discounts automatically applied for 10+ items</p>
+                <p>• Final pricing will be confirmed by manufacturer</p>
+              </div>
+            </CardContent>
+          </Card>
 
           <div>
             <Label htmlFor="notes">Additional Notes</Label>

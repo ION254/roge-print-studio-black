@@ -24,6 +24,7 @@ const DesignerPage = () => {
   const [drawingColor, setDrawingColor] = useState('#000000');
   const [mockupColor, setMockupColor] = useState('#ffffff');
   const [currentMockup, setCurrentMockup] = useState<any>(null);
+  const [printingMethod, setPrintingMethod] = useState<string>('DTG');
 
   const handleProceedToCheckout = () => {
     if (!user) {
@@ -138,7 +139,7 @@ const DesignerPage = () => {
           onOpenTemplates={handleOpenTemplates}
           onSaveDesign={handleSaveDesign}
           fabricCanvas={fabricCanvas}
-          onPrintingMethodSelect={() => {}}
+          onPrintingMethodSelect={setPrintingMethod}
         />
         
         <main className="flex-1 flex flex-col">
@@ -185,6 +186,7 @@ const DesignerPage = () => {
           fabricCanvas={fabricCanvas}
           measurements={measurements}
           productType={productType}
+          printingMethod={printingMethod}
           onClose={() => setIsCheckoutOpen(false)}
         />
       )}
