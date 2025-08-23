@@ -41,7 +41,7 @@ export interface Template {
   category: string;
   description: string;
   thumbnail: string;
-  productType: 't-shirt' | 'hoodie' | 'cap' | 'tank-top' | 'long-sleeve' | 'general' | 'scrubs' | 'jumpsuit' | 'apron';
+  productType: 't-shirt' | 'hoodie' | 'cap' | 'tank-top' | 'long-sleeve' | 'general' | 'scrubs' | 'jumpsuit' | 'apron' | 'flag' | 'water-bottle' | 'key-holder' | 'wristband' | 'packaging-bag' | 'ticketing-band' | 'business-card' | 'teardrop-banner';
   svgString?: string;
   designAreas: {
     id: string;
@@ -306,6 +306,190 @@ const sampleTemplates: Template[] = [
     availableColors: ['#ffffff'],
     popular: false,
     tags: ['blank', 'custom', 'unlimited', 'creative']
+  },
+  {
+    id: 'flag-custom',
+    name: 'Custom Flag',
+    category: 'Promotional',
+    description: 'Custom flag for events, advertising, and branding',
+    thumbnail: '/placeholder.svg',
+    productType: 'flag',
+    designAreas: [
+      {
+        id: 'center',
+        name: 'Center Area',
+        x: 80,
+        y: 120,
+        width: 140,
+        height: 100,
+        maxWidth: 160,
+        maxHeight: 120
+      }
+    ],
+    availableColors: ['#ffffff', '#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'],
+    popular: true,
+    tags: ['flag', 'promotional', 'outdoor', 'events', 'advertising']
+  },
+  {
+    id: 'water-bottle-custom',
+    name: 'Water Bottle',
+    category: 'Drinkware',
+    description: 'Custom water bottle with wraparound design area',
+    thumbnail: '/placeholder.svg',
+    productType: 'water-bottle',
+    designAreas: [
+      {
+        id: 'body',
+        name: 'Bottle Body',
+        x: 130,
+        y: 140,
+        width: 80,
+        height: 120,
+        maxWidth: 100,
+        maxHeight: 140
+      }
+    ],
+    availableColors: ['#ffffff', '#000000', '#3b82f6', '#ef4444', '#10b981', '#f59e0b'],
+    popular: true,
+    tags: ['bottle', 'drinkware', 'hydration', 'sports', 'eco-friendly']
+  },
+  {
+    id: 'key-holder-custom',
+    name: 'Key Holder',
+    category: 'Accessories',
+    description: 'Custom key holder with logo area',
+    thumbnail: '/placeholder.svg',
+    productType: 'key-holder',
+    designAreas: [
+      {
+        id: 'front',
+        name: 'Front Face',
+        x: 140,
+        y: 160,
+        width: 60,
+        height: 40,
+        maxWidth: 80,
+        maxHeight: 60
+      }
+    ],
+    availableColors: ['#000000', '#ffffff', '#6b7280', '#3b82f6', '#ef4444', '#fbbf24'],
+    popular: false,
+    tags: ['keychain', 'accessories', 'logo', 'promotional', 'compact']
+  },
+  {
+    id: 'wristband-custom',
+    name: 'Wristband',
+    category: 'Accessories',
+    description: 'Custom wristband for events and identification',
+    thumbnail: '/placeholder.svg',
+    productType: 'wristband',
+    designAreas: [
+      {
+        id: 'band',
+        name: 'Band Area',
+        x: 100,
+        y: 180,
+        width: 100,
+        height: 30,
+        maxWidth: 120,
+        maxHeight: 40
+      }
+    ],
+    availableColors: ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'],
+    popular: false,
+    tags: ['wristband', 'events', 'identification', 'medical', 'festivals']
+  },
+  {
+    id: 'packaging-bag-custom',
+    name: 'Packaging Bag',
+    category: 'Packaging',
+    description: 'Custom packaging bag for retail and branding',
+    thumbnail: '/placeholder.svg',
+    productType: 'packaging-bag',
+    designAreas: [
+      {
+        id: 'front',
+        name: 'Front Panel',
+        x: 110,
+        y: 130,
+        width: 80,
+        height: 100,
+        maxWidth: 100,
+        maxHeight: 120
+      }
+    ],
+    availableColors: ['#ffffff', '#000000', '#8b5132', '#6b7280', '#fbbf24'],
+    popular: false,
+    tags: ['bag', 'packaging', 'retail', 'eco-friendly', 'branded']
+  },
+  {
+    id: 'ticketing-band-custom',
+    name: 'Ticketing Band',
+    category: 'Events',
+    description: 'Security ticketing band for events and venues',
+    thumbnail: '/placeholder.svg',
+    productType: 'ticketing-band',
+    designAreas: [
+      {
+        id: 'band',
+        name: 'Band Area',
+        x: 90,
+        y: 180,
+        width: 120,
+        height: 25,
+        maxWidth: 140,
+        maxHeight: 35
+      }
+    ],
+    availableColors: ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'],
+    popular: false,
+    tags: ['ticket', 'events', 'security', 'festivals', 'venues', 'identification']
+  },
+  {
+    id: 'business-card-custom',
+    name: 'Business Card',
+    category: 'Stationery',
+    description: 'Professional business card design',
+    thumbnail: '/placeholder.svg',
+    productType: 'business-card',
+    designAreas: [
+      {
+        id: 'front',
+        name: 'Front Side',
+        x: 120,
+        y: 160,
+        width: 85,
+        height: 50,
+        maxWidth: 100,
+        maxHeight: 65
+      }
+    ],
+    availableColors: ['#ffffff', '#000000', '#1f2937', '#3b82f6', '#fbbf24'],
+    popular: true,
+    tags: ['business', 'professional', 'networking', 'corporate', 'contact']
+  },
+  {
+    id: 'teardrop-banner-custom',
+    name: 'Teardrop Banner',
+    category: 'Advertising',
+    description: 'Eye-catching teardrop banner for outdoor advertising',
+    thumbnail: '/placeholder.svg',
+    productType: 'teardrop-banner',
+    designAreas: [
+      {
+        id: 'main',
+        name: 'Main Area',
+        x: 110,
+        y: 100,
+        width: 80,
+        height: 140,
+        maxWidth: 100,
+        maxHeight: 160
+      }
+    ],
+    availableColors: ['#ffffff', '#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'],
+    popular: true,
+    tags: ['banner', 'advertising', 'outdoor', 'events', 'promotional', 'feather']
   }
 ];
 
@@ -430,6 +614,110 @@ export const useTemplates = (
         stroke: '#e5e7eb',
         strokeWidth: 2,
         rx: 30,
+        ry: 30
+      });
+    } else if (template.productType === 'flag') {
+      // Wide rectangle for flag mockup
+      mockupShape = new Rect({
+        left: 80,
+        top: 120,
+        width: 240,
+        height: 160,
+        fill: defaultColor,
+        stroke: '#e5e7eb',
+        strokeWidth: 2,
+        rx: 5,
+        ry: 5
+      });
+    } else if (template.productType === 'water-bottle') {
+      // Tall narrow rectangle for water bottle mockup
+      mockupShape = new Rect({
+        left: 130,
+        top: 80,
+        width: 80,
+        height: 200,
+        fill: defaultColor,
+        stroke: '#e5e7eb',
+        strokeWidth: 2,
+        rx: 40,
+        ry: 40
+      });
+    } else if (template.productType === 'key-holder') {
+      // Small rectangle for key holder mockup
+      mockupShape = new Rect({
+        left: 140,
+        top: 150,
+        width: 80,
+        height: 60,
+        fill: defaultColor,
+        stroke: '#e5e7eb',
+        strokeWidth: 2,
+        rx: 20,
+        ry: 20
+      });
+    } else if (template.productType === 'wristband') {
+      // Long thin rectangle for wristband mockup
+      mockupShape = new Rect({
+        left: 100,
+        top: 175,
+        width: 160,
+        height: 40,
+        fill: defaultColor,
+        stroke: '#e5e7eb',
+        strokeWidth: 2,
+        rx: 20,
+        ry: 20
+      });
+    } else if (template.productType === 'packaging-bag') {
+      // Medium rectangle for packaging bag mockup
+      mockupShape = new Rect({
+        left: 110,
+        top: 120,
+        width: 160,
+        height: 180,
+        fill: defaultColor,
+        stroke: '#e5e7eb',
+        strokeWidth: 2,
+        rx: 10,
+        ry: 10
+      });
+    } else if (template.productType === 'ticketing-band') {
+      // Very thin rectangle for ticketing band mockup
+      mockupShape = new Rect({
+        left: 90,
+        top: 180,
+        width: 200,
+        height: 30,
+        fill: defaultColor,
+        stroke: '#e5e7eb',
+        strokeWidth: 2,
+        rx: 15,
+        ry: 15
+      });
+    } else if (template.productType === 'business-card') {
+      // Standard business card rectangle
+      mockupShape = new Rect({
+        left: 120,
+        top: 155,
+        width: 120,
+        height: 70,
+        fill: defaultColor,
+        stroke: '#e5e7eb',
+        strokeWidth: 2,
+        rx: 5,
+        ry: 5
+      });
+    } else if (template.productType === 'teardrop-banner') {
+      // Tall teardrop-like rectangle for banner mockup
+      mockupShape = new Rect({
+        left: 110,
+        top: 80,
+        width: 120,
+        height: 200,
+        fill: defaultColor,
+        stroke: '#e5e7eb',
+        strokeWidth: 2,
+        rx: 60,
         ry: 30
       });
     } else {

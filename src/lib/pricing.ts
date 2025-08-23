@@ -16,12 +16,23 @@ export interface PricingResult {
 
 // Base unit prices in KSh
 const BASE_PRICES: Record<string, number> = {
-  'T-Shirt': 800,
-  'Hoodie': 1800,
-  'Cap': 600,
-  'Apron': 700,
-  'Scrubs': 1200,
-  'Jumpsuit': 2000,
+  't-shirt': 800,
+  'hoodie': 1800,
+  'cap': 600,
+  'apron': 700,
+  'scrubs': 1200,
+  'jumpsuit': 2000,
+  'long-sleeve': 900,
+  'tank-top': 700,
+  'flag': 1000,
+  'water-bottle': 1200,
+  'key-holder': 300,
+  'wristband': 200,
+  'packaging-bag': 800,
+  'ticketing-band': 150,
+  'business-card': 100,
+  'teardrop-banner': 1500,
+  'general': 500,
 };
 
 // Printing method surcharges in KSh
@@ -54,7 +65,7 @@ export function calculatePricing(
   designCoverage: 'small' | 'medium' | 'large' = 'small'
 ): PricingResult {
   // Get base price
-  const baseUnitPrice = BASE_PRICES[productType] || BASE_PRICES['T-Shirt'];
+  const baseUnitPrice = BASE_PRICES[productType] || BASE_PRICES['t-shirt'];
   const basePrice = baseUnitPrice * quantity;
 
   // Get printing surcharge
