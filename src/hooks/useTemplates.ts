@@ -8,6 +8,14 @@ import capBaseballImage from '@/assets/template-cap-baseball.jpg';
 import tshirtVneckImage from '@/assets/template-tshirt-vneck.jpg';
 import hoodieZipImage from '@/assets/template-hoodie-zip.jpg';
 import tshirtLongsleeveImage from '@/assets/template-tshirt-longsleeve.jpg';
+import flagTemplate from '@/assets/template-flag.jpg';
+import waterBottleTemplate from '@/assets/template-water-bottle.jpg';
+import keyholderTemplate from '@/assets/template-keyholder.jpg';
+import wristbandTemplate from '@/assets/template-wristband.jpg';
+import packagingBagTemplate from '@/assets/template-packaging-bag.jpg';
+import ticketingBandTemplate from '@/assets/template-ticketing-band.jpg';
+import businessCardTemplate from '@/assets/template-business-card.jpg';
+import teardropBannerTemplate from '@/assets/template-teardrop-banner.jpg';
 
 // Custom interfaces for extended properties
 interface CustomFabricObject extends FabricObject {
@@ -312,7 +320,7 @@ const sampleTemplates: Template[] = [
     name: 'Custom Flag',
     category: 'Promotional',
     description: 'Custom flag for events, advertising, and branding',
-    thumbnail: '/placeholder.svg',
+     thumbnail: flagTemplate,
     productType: 'flag',
     designAreas: [
       {
@@ -335,7 +343,7 @@ const sampleTemplates: Template[] = [
     name: 'Water Bottle',
     category: 'Drinkware',
     description: 'Custom water bottle with wraparound design area',
-    thumbnail: '/placeholder.svg',
+     thumbnail: waterBottleTemplate,
     productType: 'water-bottle',
     designAreas: [
       {
@@ -358,7 +366,7 @@ const sampleTemplates: Template[] = [
     name: 'Key Holder',
     category: 'Accessories',
     description: 'Custom key holder with logo area',
-    thumbnail: '/placeholder.svg',
+     thumbnail: keyholderTemplate,
     productType: 'key-holder',
     designAreas: [
       {
@@ -381,7 +389,7 @@ const sampleTemplates: Template[] = [
     name: 'Wristband',
     category: 'Accessories',
     description: 'Custom wristband for events and identification',
-    thumbnail: '/placeholder.svg',
+     thumbnail: wristbandTemplate,
     productType: 'wristband',
     designAreas: [
       {
@@ -404,7 +412,7 @@ const sampleTemplates: Template[] = [
     name: 'Packaging Bag',
     category: 'Packaging',
     description: 'Custom packaging bag for retail and branding',
-    thumbnail: '/placeholder.svg',
+     thumbnail: packagingBagTemplate,
     productType: 'packaging-bag',
     designAreas: [
       {
@@ -427,7 +435,7 @@ const sampleTemplates: Template[] = [
     name: 'Ticketing Band',
     category: 'Events',
     description: 'Security ticketing band for events and venues',
-    thumbnail: '/placeholder.svg',
+     thumbnail: ticketingBandTemplate,
     productType: 'ticketing-band',
     designAreas: [
       {
@@ -450,7 +458,7 @@ const sampleTemplates: Template[] = [
     name: 'Business Card',
     category: 'Stationery',
     description: 'Professional business card design',
-    thumbnail: '/placeholder.svg',
+     thumbnail: businessCardTemplate,
     productType: 'business-card',
     designAreas: [
       {
@@ -473,7 +481,7 @@ const sampleTemplates: Template[] = [
     name: 'Teardrop Banner',
     category: 'Advertising',
     description: 'Eye-catching teardrop banner for outdoor advertising',
-    thumbnail: '/placeholder.svg',
+     thumbnail: teardropBannerTemplate,
     productType: 'teardrop-banner',
     designAreas: [
       {
