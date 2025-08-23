@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Send, Package, Clock, Calculator, RefreshCw, AlertCircle } from 'lucide-react';
 import { calculatePricing, formatKsh, kshToCents } from '@/lib/pricing';
+import { getProductQuantityRule, isValidQuantity, roundUpToValidQuantity, getEffectiveMinimum } from '@/lib/quantityRules';
 
 interface Manufacturer {
   id: string;
@@ -44,7 +45,7 @@ export const OrderSubmission: React.FC<OrderSubmissionProps> = ({
   const [manufacturersLoading, setManufacturersLoading] = useState(true);
   const [manufacturersError, setManufacturersError] = useState<string>('');
   const [selectedManufacturer, setSelectedManufacturer] = useState<string>('');
-  const [quantity, setQuantity] = useState<number>(50);
+  const [quantity, setQuantity] = useState<number>(1);
   const [notes, setNotes] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -53,6 +54,16 @@ export const OrderSubmission: React.FC<OrderSubmissionProps> = ({
   const pricing = useMemo(() => {
     return calculatePricing(productType, printingMethod, quantity);
   }, [productType, printingMethod, quantity]);
+
+  // Get product quantity rule
+  const productRule = getProductQuantityRule(productType);
+
+  // Set initial quantity based on product rule when component mounts or product changes
+  useEffect(() => {
+    if (productRule) {
+      setQuantity(productRule.minimumQuantity);
+    }
+  }, [productType, productRule]);
 
   useEffect(() => {
     fetchManufacturers();
@@ -207,6 +218,27 @@ export const OrderSubmission: React.FC<OrderSubmissionProps> = ({
   };
 
   const selectedManufacturerData = manufacturers.find(m => m.id === selectedManufacturer);
+  
+  // Calculate effective minimum considering both product rules and manufacturer minimums
+  const effectiveMinimum = selectedManufacturerData ? 
+    getEffectiveMinimum(productType, selectedManufacturerData.minimum_order_quantity) : 
+    (productRule?.minimumQuantity || 1);
+  
+  // Check if current quantity is valid
+  const isQuantityValid = isValidQuantity(productType, quantity) && quantity >= effectiveMinimum;
+
+  // Handle quantity change with automatic rounding
+  const handleQuantityChange = (value: string) => {
+    const numValue = parseInt(value) || 0;
+    if (numValue <= 0) {
+      setQuantity(effectiveMinimum);
+      return;
+    }
+    
+    // Round up to valid quantity if needed
+    const validQuantity = roundUpToValidQuantity(productType, numValue);
+    setQuantity(Math.max(validQuantity, effectiveMinimum));
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -313,16 +345,33 @@ export const OrderSubmission: React.FC<OrderSubmissionProps> = ({
             <Input
               id="quantity"
               type="number"
-              min={selectedManufacturerData?.minimum_order_quantity || 1}
+              min={effectiveMinimum}
+              step={productRule?.stepSize || 1}
               value={quantity}
-              onChange={(e) => setQuantity(parseInt(e.target.value))}
+              onChange={(e) => handleQuantityChange(e.target.value)}
               placeholder="Enter quantity"
+              className={!isQuantityValid ? "border-destructive" : ""}
             />
-            {selectedManufacturerData && quantity < selectedManufacturerData.minimum_order_quantity && (
-              <p className="text-sm text-destructive mt-1">
-                Minimum order quantity is {selectedManufacturerData.minimum_order_quantity} units
-              </p>
-            )}
+            <div className="mt-1 space-y-1">
+              {productRule && (
+                <p className="text-sm text-muted-foreground">
+                  {productRule.description} (minimum: {productRule.minimumQuantity})
+                </p>
+              )}
+              {selectedManufacturerData && selectedManufacturerData.minimum_order_quantity > (productRule?.minimumQuantity || 0) && (
+                <p className="text-sm text-muted-foreground">
+                  Manufacturer minimum: {selectedManufacturerData.minimum_order_quantity} units
+                </p>
+              )}
+              {!isQuantityValid && (
+                <p className="text-sm text-destructive">
+                  {quantity < effectiveMinimum 
+                    ? `Minimum quantity is ${effectiveMinimum} units`
+                    : `Must be in multiples of ${productRule?.stepSize || 1}`
+                  }
+                </p>
+              )}
+            </div>
           </div>
 
           <div>
@@ -419,7 +468,7 @@ export const OrderSubmission: React.FC<OrderSubmissionProps> = ({
           <div className="flex gap-4 pt-4">
             <Button
               onClick={handleSubmitOrder}
-              disabled={loading || manufacturersLoading || !selectedManufacturer || (selectedManufacturerData && quantity < selectedManufacturerData.minimum_order_quantity)}
+              disabled={loading || manufacturersLoading || !selectedManufacturer || !isQuantityValid}
               className="flex-1"
             >
               {loading ? 'Submitting...' : 'Submit Order'}
@@ -427,9 +476,9 @@ export const OrderSubmission: React.FC<OrderSubmissionProps> = ({
             {(!selectedManufacturer && !manufacturersLoading && !manufacturersError) && (
               <p className="text-xs text-muted-foreground mt-1">Select a manufacturer to continue</p>
             )}
-            {(selectedManufacturerData && quantity < selectedManufacturerData.minimum_order_quantity) && (
+            {!isQuantityValid && (
               <p className="text-xs text-destructive mt-1">
-                Quantity must be at least {selectedManufacturerData.minimum_order_quantity} units
+                Please enter a valid quantity
               </p>
             )}
             <Button variant="outline" onClick={onClose}>
