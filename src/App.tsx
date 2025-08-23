@@ -13,6 +13,12 @@ import CollectionPage from "./pages/CollectionPage";
 import AuthPage from "./pages/AuthPage";
 import ManufacturersPage from "./pages/ManufacturersPage";
 import ManufacturerDashboard from "./pages/ManufacturerDashboard";
+import { ManufacturerPortalLayout } from "./components/layout/ManufacturerPortalLayout";
+import { ManufacturerOrdersPage } from "./pages/manufacturer/ManufacturerOrdersPage";
+import { ManufacturerWalletPage } from "./pages/manufacturer/ManufacturerWalletPage";
+import { ManufacturerPortfolioPage } from "./pages/manufacturer/ManufacturerPortfolioPage";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { Navigate } from "react-router-dom";
 
 const queryClient = new QueryClient();
 
@@ -30,7 +36,21 @@ const App = () => (
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/collection" element={<CollectionPage />} />
             <Route path="/manufacturers" element={<ManufacturersPage />} />
-            <Route path="/manufacturer-dashboard" element={<ManufacturerDashboard />} />
+            
+            {/* Manufacturer Portal Routes */}
+            <Route path="/manufacturer" element={
+              <ProtectedRoute>
+                <ManufacturerPortalLayout />
+              </ProtectedRoute>
+            }>
+              <Route path="orders" element={<ManufacturerOrdersPage />} />
+              <Route path="wallet" element={<ManufacturerWalletPage />} />
+              <Route path="portfolio" element={<ManufacturerPortfolioPage />} />
+            </Route>
+            
+            {/* Legacy redirect */}
+            <Route path="/manufacturer-dashboard" element={<Navigate to="/manufacturer/orders" replace />} />
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Menu, User, LogOut } from 'lucide-react';
+import { Menu, User, LogOut, Package } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -99,6 +99,12 @@ const Header = () => {
                       Profile
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/manufacturer/orders" className="w-full">
+                      <Package className="mr-2 h-4 w-4" />
+                      Manufacturer Portal
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />
@@ -156,6 +162,13 @@ const Header = () => {
                   className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-muted hover:text-primary"
                 >
                   Profile
+                </Link>
+                <Link
+                  to="/manufacturer/orders"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-muted hover:text-primary"
+                >
+                  Manufacturer Portal
                 </Link>
                 <button
                   onClick={() => {
