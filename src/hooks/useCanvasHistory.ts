@@ -59,25 +59,20 @@ export const useCanvasHistory = (fabricCanvas: FabricCanvas | null) => {
     setHistoryIndex(0);
   }, [fabricCanvas, history.length]);
 
-  // Auto-save on canvas changes
+  // Auto-save on canvas changes with throttling
   useEffect(() => {
     if (!fabricCanvas) return;
 
-    const handleObjectAdded = () => {
-      setTimeout(saveState, 100); // Debounce
+    let timeoutId: NodeJS.Timeout;
+    const throttledSaveState = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(saveState, 250); // Throttle to 250ms
     };
 
-    const handleObjectRemoved = () => {
-      setTimeout(saveState, 100);
-    };
-
-    const handleObjectModified = () => {
-      setTimeout(saveState, 100);
-    };
-
-    const handlePathCreated = () => {
-      setTimeout(saveState, 100);
-    };
+    const handleObjectAdded = throttledSaveState;
+    const handleObjectRemoved = throttledSaveState;
+    const handleObjectModified = throttledSaveState;
+    const handlePathCreated = throttledSaveState;
 
     fabricCanvas.on('object:added', handleObjectAdded);
     fabricCanvas.on('object:removed', handleObjectRemoved);
@@ -85,6 +80,7 @@ export const useCanvasHistory = (fabricCanvas: FabricCanvas | null) => {
     fabricCanvas.on('path:created', handlePathCreated);
 
     return () => {
+      clearTimeout(timeoutId);
       fabricCanvas.off('object:added', handleObjectAdded);
       fabricCanvas.off('object:removed', handleObjectRemoved);
       fabricCanvas.off('object:modified', handleObjectModified);

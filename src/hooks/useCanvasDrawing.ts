@@ -8,41 +8,38 @@ export const useCanvasDrawing = (
   color: string
 ) => {
   useEffect(() => {
-    if (!fabricCanvas) {
-      console.log('Canvas not available for drawing setup');
-      return;
-    }
+    if (!fabricCanvas || fabricCanvas.disposed) return;
 
-    console.log('Setting drawing mode:', isDrawingMode, 'with color:', color);
-    
     // Set drawing mode
     fabricCanvas.isDrawingMode = isDrawingMode;
+  }, [fabricCanvas, isDrawingMode]);
+
+  useEffect(() => {
+    if (!fabricCanvas || fabricCanvas.disposed || !fabricCanvas.freeDrawingBrush) return;
     
-    // Configure the brush if available
-    if (fabricCanvas.freeDrawingBrush) {
-      fabricCanvas.freeDrawingBrush.color = color;
-      fabricCanvas.freeDrawingBrush.width = 3;
-      console.log('Brush configured:', {
-        color: fabricCanvas.freeDrawingBrush.color,
-        width: fabricCanvas.freeDrawingBrush.width,
-        isDrawingMode: fabricCanvas.isDrawingMode
-      });
-    } else {
-      console.error('FreeDrawingBrush not available when trying to configure drawing');
+    // Configure the brush
+    fabricCanvas.freeDrawingBrush.color = color;
+    fabricCanvas.freeDrawingBrush.width = 3;
+  }, [fabricCanvas, color]);
+
+  useEffect(() => {
+    if (!fabricCanvas || fabricCanvas.disposed) return;
+    
+    // Set the cursor safely
+    try {
+      if (isDrawingMode) {
+        fabricCanvas.setCursor('crosshair');
+        fabricCanvas.hoverCursor = 'crosshair';
+        fabricCanvas.moveCursor = 'crosshair';
+      } else {
+        fabricCanvas.setCursor('default');
+        fabricCanvas.hoverCursor = 'move';
+        fabricCanvas.moveCursor = 'move';
+      }
+    } catch (error) {
+      // Silently handle cursor errors on disposed canvas
     }
     
-    // Set the cursor to indicate drawing mode
-    if (isDrawingMode) {
-      fabricCanvas.setCursor('crosshair');
-      fabricCanvas.hoverCursor = 'crosshair';
-      fabricCanvas.moveCursor = 'crosshair';
-    } else {
-      fabricCanvas.setCursor('default');
-      fabricCanvas.hoverCursor = 'move';
-      fabricCanvas.moveCursor = 'move';
-    }
-    
-    // Ensure objects are rendered correctly by forcing a re-render
     fabricCanvas.renderAll();
-  }, [fabricCanvas, isDrawingMode, color]);
+  }, [fabricCanvas, isDrawingMode]);
 };

@@ -25,14 +25,12 @@ export const useDesignCanvas = (): FabricCanvasHook => {
       preserveObjectStacking: true,
     });
     
-    // Initialize the freeDrawingBrush properly
-    if (canvasInstance.freeDrawingBrush) {
+    // Initialize the freeDrawingBrush properly with PencilBrush
+    import('fabric').then(({ PencilBrush }) => {
+      canvasInstance.freeDrawingBrush = new PencilBrush(canvasInstance);
       canvasInstance.freeDrawingBrush.color = '#000000';
       canvasInstance.freeDrawingBrush.width = 3;
-      console.log('Drawing brush initialized:', canvasInstance.freeDrawingBrush);
-    } else {
-      console.warn('FreeDrawingBrush not available on canvas instance');
-    }
+    });
     
     setFabricCanvas(canvasInstance);
 
@@ -61,6 +59,7 @@ export const useDesignCanvas = (): FabricCanvasHook => {
       window.removeEventListener('resize', handleResize);
       if (canvasInstance && !canvasInstance.disposed) {
         canvasInstance.dispose();
+        setFabricCanvas(null);
       }
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
