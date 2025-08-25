@@ -140,6 +140,11 @@ const DesignerPage = () => {
           onSaveDesign={handleSaveDesign}
           fabricCanvas={fabricCanvas}
           onPrintingMethodSelect={setPrintingMethod}
+          onOpenCollageTemplates={() => {
+            if ((window as any).designCanvasAPI) {
+              (window as any).designCanvasAPI.setIsCollageTemplatesOpen?.(true);
+            }
+          }}
         />
         
         <main className="flex-1 flex flex-col">

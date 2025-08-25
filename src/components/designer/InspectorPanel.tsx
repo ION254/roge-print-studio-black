@@ -6,8 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { ColorPicker } from './ColorPicker';
-import { Canvas as FabricCanvas, FabricObject } from 'fabric';
-import { Settings, Layers, Type, Palette } from 'lucide-react';
+import { Canvas as FabricCanvas, FabricObject, Image as FabricImage } from 'fabric';
+import { Settings, Layers, Type, Palette, RotateCcw } from 'lucide-react';
 
 interface InspectorPanelProps {
   fabricCanvas?: FabricCanvas | null;
@@ -260,6 +260,91 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                       <span className="text-xs font-medium">Text Properties</span>
                     </div>
                     {/* Text formatting controls would go here */}
+                  </div>
+                )}
+
+                {/* Image Adjustments */}
+                {selectedObject.type === 'image' && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 justify-between">
+                      <div className="flex items-center gap-2">
+                        <Palette className="h-4 w-4" />
+                        <span className="text-xs font-medium">Image Adjustments</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          // Reset filters functionality would be implemented here
+                          console.log('Reset filters');
+                        }}
+                        className="h-6 px-2"
+                      >
+                        <RotateCcw className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Brightness</Label>
+                        <Slider
+                          value={[0]}
+                          onValueChange={(value) => console.log('Brightness:', value)}
+                          min={-100}
+                          max={100}
+                          step={1}
+                          className="mt-2"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Contrast</Label>
+                        <Slider
+                          value={[0]}
+                          onValueChange={(value) => console.log('Contrast:', value)}
+                          min={-100}
+                          max={100}
+                          step={1}
+                          className="mt-2"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Saturation</Label>
+                        <Slider
+                          value={[0]}
+                          onValueChange={(value) => console.log('Saturation:', value)}
+                          min={-100}
+                          max={100}
+                          step={1}
+                          className="mt-2"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Hue</Label>
+                        <Slider
+                          value={[0]}
+                          onValueChange={(value) => console.log('Hue:', value)}
+                          min={0}
+                          max={360}
+                          step={1}
+                          className="mt-2"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Blur</Label>
+                        <Slider
+                          value={[0]}
+                          onValueChange={(value) => console.log('Blur:', value)}
+                          min={0}
+                          max={100}
+                          step={1}
+                          className="mt-2"
+                        />
+                      </div>
+                    </div>
                   </div>
                 )}
 

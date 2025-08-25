@@ -5,9 +5,15 @@ import { useCanvasShapes } from '@/hooks/useCanvasShapes';
 import { useCanvasText } from '@/hooks/useCanvasText';
 import { useCanvasImage } from '@/hooks/useCanvasImage';
 import { useTemplates } from '@/hooks/useTemplates';
+import { useCollageFrames } from '@/hooks/useCollageFrames';
+import { useCanvasHistory } from '@/hooks/useCanvasHistory';
+import { useCanvasFilters } from '@/hooks/useCanvasFilters';
+import { useCanvasGuides } from '@/hooks/useCanvasGuides';
 import { Templates } from './Templates';
 import { ShapeLibrary } from './ShapeLibrary';
 import { SuggestedDesigns, SuggestedDesign } from './SuggestedDesigns';
+import { CollageTemplates, CollageLayout } from './collage/CollageTemplates';
+import { CanvasTopbar } from './CanvasTopbar';
 import { ThreeDView } from './ThreeDView';
 import { Measurements } from './Measurements';
 import { toast } from 'sonner';
@@ -44,6 +50,30 @@ interface DesignCanvasProps {
   mockupColor?: string;
   onMockupColorChange?: (color: string) => void;
   currentMockup?: any;
+  // Collage controls
+  collageGutter?: number;
+  onCollageGutterChange?: (value: number) => void;
+  collageCornerRadius?: number;
+  onCollageCornerRadiusChange?: (value: number) => void;
+  collageBackgroundColor?: string;
+  onCollageBackgroundColorChange?: (color: string) => void;
+  onCollageBackgroundImageUpload?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onReplaceSelectedFrame?: () => void;
+  onSwapFrames?: () => void;
+  canSwapFrames?: boolean;
+  onOpenCollageTemplates?: () => void;
+  // Canvas controls
+  zoom?: number;
+  onZoomChange?: (zoom: number) => void;
+  isPanMode?: boolean;
+  onPanModeToggle?: () => void;
+  canUndo?: boolean;
+  canRedo?: boolean;
+  onUndo?: () => void;
+  onRedo?: () => void;
+  onCanvasSizeChange?: (width: number, height: number) => void;
+  onExport?: (format: string, quality: number, transparent: boolean) => void;
+  currentCanvasSize?: { width: number; height: number };
 }
 
 // Declare global window interface for design canvas API
@@ -88,11 +118,16 @@ export const DesignCanvas: React.FC<DesignCanvasProps> = ({
   const [activeMockupObject, setActiveMockupObject] = useState<CustomFabricObject | CustomGroup | null>(null);
   const [isShapeLibraryOpen, setIsShapeLibraryOpen] = useState<boolean>(false);
   const [isSuggestedDesignsOpen, setIsSuggestedDesignsOpen] = useState<boolean>(false);
+  const [isCollageTemplatesOpen, setIsCollageTemplatesOpen] = useState<boolean>(false);
   
   const { fabricCanvas, initCanvas } = useDesignCanvas();
   const { addShape, addEmblem } = useCanvasShapes(fabricCanvas);
   const { addText } = useCanvasText(fabricCanvas);
   const { handleImageUpload } = useCanvasImage(fabricCanvas);
+  const collageFrames = useCollageFrames(fabricCanvas);
+  const canvasHistory = useCanvasHistory(fabricCanvas);
+  const canvasFilters = useCanvasFilters(fabricCanvas);
+  const canvasGuides = useCanvasGuides(fabricCanvas);
 
   // Pass setActiveMockupObject and mockupColor to useTemplates
   const { templates, isTemplateDrawerOpen, setIsTemplateDrawerOpen, applyTemplate, currentMockup, changeMockupColor } = useTemplates(
@@ -208,6 +243,7 @@ export const DesignCanvas: React.FC<DesignCanvasProps> = ({
         setIsShapeLibraryOpen,
         setIsSuggestedDesignsOpen,
         setIsTemplateDrawerOpen,
+        setIsCollageTemplatesOpen,
         applyTemplate,
         templates,
         currentMockup: externalCurrentMockup || currentMockup
@@ -217,6 +253,20 @@ export const DesignCanvas: React.FC<DesignCanvasProps> = ({
 
   return (
     <div className="w-full h-full flex flex-col">
+      <CanvasTopbar
+        zoom={1}
+        onZoomChange={() => {}}
+        isPanMode={false}
+        onPanModeToggle={() => {}}
+        canUndo={canvasHistory.canUndo}
+        canRedo={canvasHistory.canRedo}
+        onUndo={canvasHistory.undo}
+        onRedo={canvasHistory.redo}
+        onCanvasSizeChange={() => {}}
+        onExport={() => {}}
+        currentCanvasSize={{ width: 1080, height: 1080 }}
+      />
+
       {/* Canvas Container */}
       <div className="flex-1 border-2 border-border rounded-lg bg-muted/10 relative overflow-hidden">
         <canvas ref={canvasRef} className="max-w-full block mx-auto" />
@@ -254,6 +304,15 @@ export const DesignCanvas: React.FC<DesignCanvasProps> = ({
         open={isSuggestedDesignsOpen}
         onOpenChange={setIsSuggestedDesignsOpen}
         onDesignSelect={handleSuggestedDesignSelect}
+      />
+
+      <CollageTemplates
+        open={isCollageTemplatesOpen}
+        onOpenChange={setIsCollageTemplatesOpen}
+        onLayoutSelect={(layout, mode) => {
+          collageFrames.createCollage(layout, mode);
+          setIsCollageTemplatesOpen(false);
+        }}
       />
     </div>
   );

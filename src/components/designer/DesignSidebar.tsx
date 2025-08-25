@@ -15,12 +15,14 @@ import {
   Palette,
   Printer,
   Trash2,
-  Save
+  Save,
+  Layout
 } from 'lucide-react';
 import { ActiveTool } from './Toolbar';
 import { Canvas as FabricCanvas } from 'fabric';
 import { TextFormatMenu } from './TextFormatMenu';
 import { PrintingOptions } from './PrintingOptions';
+import { CollageControls } from './collage/CollageControls';
 
 interface DesignSidebarProps {
   activeTool: ActiveTool;
@@ -34,6 +36,18 @@ interface DesignSidebarProps {
   onSaveDesign: () => void;
   fabricCanvas?: FabricCanvas | null;
   onPrintingMethodSelect?: (method: string) => void;
+  // Collage controls
+  collageGutter?: number;
+  onCollageGutterChange?: (value: number) => void;
+  collageCornerRadius?: number;
+  onCollageCornerRadiusChange?: (value: number) => void;
+  collageBackgroundColor?: string;
+  onCollageBackgroundColorChange?: (color: string) => void;
+  onCollageBackgroundImageUpload?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onReplaceSelectedFrame?: () => void;
+  onSwapFrames?: () => void;
+  canSwapFrames?: boolean;
+  onOpenCollageTemplates?: () => void;
 }
 
 export const DesignSidebar: React.FC<DesignSidebarProps> = ({
@@ -47,7 +61,19 @@ export const DesignSidebar: React.FC<DesignSidebarProps> = ({
   onOpenTemplates,
   onSaveDesign,
   fabricCanvas,
-  onPrintingMethodSelect
+  onPrintingMethodSelect,
+  // Collage props
+  collageGutter = 12,
+  onCollageGutterChange,
+  collageCornerRadius = 16,
+  onCollageCornerRadiusChange,
+  collageBackgroundColor = '#ffffff',
+  onCollageBackgroundColorChange,
+  onCollageBackgroundImageUpload,
+  onReplaceSelectedFrame,
+  onSwapFrames,
+  canSwapFrames = false,
+  onOpenCollageTemplates
 }) => {
   const toolButtons = [
     { id: 'select' as const, icon: MousePointer2, label: 'Select', tooltip: 'Select and move objects' },
@@ -126,6 +152,39 @@ export const DesignSidebar: React.FC<DesignSidebarProps> = ({
               <Palette className="h-4 w-4" />
               Browse Templates
             </Button>
+          </div>
+
+          <Separator />
+
+          {/* Collage */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Collage</h4>
+            {onOpenCollageTemplates && onCollageGutterChange && onCollageCornerRadiusChange && 
+             onCollageBackgroundColorChange && onCollageBackgroundImageUpload && 
+             onReplaceSelectedFrame && onSwapFrames ? (
+              <CollageControls
+                gutter={collageGutter}
+                onGutterChange={onCollageGutterChange}
+                cornerRadius={collageCornerRadius}
+                onCornerRadiusChange={onCollageCornerRadiusChange}
+                backgroundColor={collageBackgroundColor}
+                onBackgroundColorChange={onCollageBackgroundColorChange}
+                onBackgroundImageUpload={onCollageBackgroundImageUpload}
+                onReplaceSelectedFrame={onReplaceSelectedFrame}
+                onSwapFrames={onSwapFrames}
+                canSwapFrames={canSwapFrames}
+                onOpenCollageTemplates={onOpenCollageTemplates}
+              />
+            ) : (
+              <Button
+                variant="outline"
+                onClick={onOpenCollageTemplates}
+                className="w-full justify-start gap-2"
+              >
+                <Layout className="h-4 w-4" />
+                Collage Templates
+              </Button>
+            )}
           </div>
 
           <Separator />
