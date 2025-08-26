@@ -160,7 +160,7 @@ export const DesignCanvas: React.FC<DesignCanvasProps> = ({
 
   useEffect(() => {
     if (currentMockup && changeMockupColor) {
-      changeMockupColor(mockupColor);
+      changeMockupColor(mockupColor, false);
     }
   }, [mockupColor, currentMockup, changeMockupColor]);
   const handleToolClick = (tool: string) => {

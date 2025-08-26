@@ -510,13 +510,20 @@ export const useTemplates = (
   const [isTemplateDrawerOpen, setIsTemplateDrawerOpen] = useState(false);
   const [currentMockup, setCurrentMockup] = useState<CustomFabricObject | CustomGroup | null>(null);
 
-  const changeMockupColor = (color: string) => {
+  const changeMockupColor = (color: string, notify: boolean = false) => {
     if (!fabricCanvas || !currentMockup) return;
+    
+    // Early return if color hasn't changed
+    if (currentMockup.get('fill') === color) return;
     
     // Simple color change using Fabric.js fill property
     currentMockup.set('fill', color);
     fabricCanvas.renderAll();
-    toast.success('Mockup color updated!');
+    
+    // Only show toast if notify is true
+    if (notify) {
+      toast.success('Mockup color updated!');
+    }
   };
 
   const applyTemplate = (template: Template) => {
