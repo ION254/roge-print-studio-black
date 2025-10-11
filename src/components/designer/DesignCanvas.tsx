@@ -268,8 +268,8 @@ export const DesignCanvas: React.FC<DesignCanvasProps> = ({
       />
 
       {/* Canvas Container */}
-      <div className="flex-1 border-2 border-border rounded-lg bg-muted/10 relative overflow-hidden">
-        <canvas ref={canvasRef} className="max-w-full block mx-auto" />
+      <div className="flex-1 border-2 border-border rounded-lg bg-muted/10 relative flex items-center justify-center p-4">
+        <canvas ref={canvasRef} className="max-w-full max-h-full shadow-lg" />
       </div>
 
       {/* Bottom Panel */}

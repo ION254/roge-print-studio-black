@@ -162,7 +162,7 @@ const DesignerPage = () => {
             </div>
           </div>
           
-          <div className="flex-1 p-4">
+          <div className="flex-1 p-6 flex flex-col min-h-0">
             <DesignCanvas 
               onCanvasReady={setFabricCanvas}
               onMeasurementsChange={setMeasurements}
