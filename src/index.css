@@ -8,7 +8,7 @@
     --background: 255 100% 100%; /* #FFFFFF */
     --foreground: 0 0% 13%; /* #212121 */
 
-    --card: 0 0% 97%; /* #F7F7F7 */
+    --card: 40 20% 97%;
     --card-foreground: 0 0% 13%; /* #212121 */
 
     --popover: 255 100% 100%; /* #FFFFFF */
@@ -75,7 +75,11 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-family: 'Manrope', system-ui, sans-serif;
+  }
+  h1, h2, h3, .font-display {
+    font-family: 'Archivo', system-ui, sans-serif;
+    letter-spacing: -0.02em;
   }
   html {
     scroll-behavior: smooth;
