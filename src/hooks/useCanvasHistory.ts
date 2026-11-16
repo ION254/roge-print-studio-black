@@ -63,7 +63,7 @@ export const useCanvasHistory = (fabricCanvas: FabricCanvas | null) => {
   useEffect(() => {
     if (!fabricCanvas) return;
 
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
     const throttledSaveState = () => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(saveState, 250); // Throttle to 250ms

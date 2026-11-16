@@ -7,7 +7,7 @@ const Footer = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="text-xl font-bold text-foreground mb-4">roge</h3>
+            <h3 className="font-display text-2xl font-black text-foreground mb-4">roge</h3>
             <p className="text-sm">
               Your partner for high-quality custom printing. We bring your designs to life.
             </p>
