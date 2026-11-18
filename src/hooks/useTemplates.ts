@@ -5,6 +5,7 @@ import scrubsTemplate from '@/assets/template-scrubs.jpg';
 import jumpsuitTemplate from '@/assets/template-jumpsuit.jpg';
 import apronTemplate from '@/assets/template-apron.jpg';
 import { toast } from 'sonner';
+import { CATALOG } from '@/data/catalog';
 import tshirtBasicImage from '@/assets/template-tshirt-basic.jpg';
 import hoodieClassicImage from '@/assets/template-hoodie-classic.jpg';
 import capBaseballImage from '@/assets/template-cap-baseball.jpg';
@@ -52,7 +53,7 @@ export interface Template {
   category: string;
   description: string;
   thumbnail: string;
-  productType: 't-shirt' | 'hoodie' | 'cap' | 'tank-top' | 'long-sleeve' | 'general' | 'scrubs' | 'jumpsuit' | 'apron' | 'flag' | 'water-bottle' | 'key-holder' | 'wristband' | 'packaging-bag' | 'ticketing-band' | 'business-card' | 'teardrop-banner';
+  productType: string;
   svgString?: string;
   designAreas: {
     id: string;
@@ -504,12 +505,26 @@ const sampleTemplates: Template[] = [
   }
 ];
 
+// Full apparel catalog as design templates
+const catalogTemplates: Template[] = CATALOG.filter(c => c.category !== 'Merch').map(c => ({
+  id: c.id,
+  name: c.name,
+  category: c.category,
+  description: c.spec,
+  thumbnail: c.image,
+  productType: c.productType,
+  designAreas: [{ id: 'front', name: 'Front', x: 100, y: 120, width: 100, height: 100, maxWidth: 120, maxHeight: 120 }],
+  availableColors: ['#ffffff', '#000000', '#6b7280', '#1f2937', '#d6cfc4', '#3f4f3a'],
+  popular: !!c.tag,
+  tags: [c.category.toLowerCase(), c.productType],
+}));
+
 export const useTemplates = (
   fabricCanvas: FabricCanvas | null,
   setActiveMockupObject: (obj: CustomFabricObject | CustomGroup | null) => void,
   activeColor: string
 ) => {
-  const [templates] = useState<Template[]>(sampleTemplates);
+  const [templates] = useState<Template[]>([...catalogTemplates, ...sampleTemplates]);
   const [isTemplateDrawerOpen, setIsTemplateDrawerOpen] = useState(false);
   const [currentMockup, setCurrentMockup] = useState<CustomFabricObject | CustomGroup | null>(null);
 

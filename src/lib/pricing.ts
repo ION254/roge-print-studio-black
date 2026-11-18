@@ -32,6 +32,11 @@ const BASE_PRICES: Record<string, number> = {
   'ticketing-band': 150,
   'business-card': 100,
   'teardrop-banner': 1500,
+  'tee-heavy': 1000,
+  'sweatshirt': 2000,
+  'sweatpants': 1900,
+  'shorts': 1300,
+  'jacket': 3200,
   'general': 500,
 };
 

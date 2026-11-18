@@ -44,7 +44,7 @@ export const OrderSubmission: React.FC<OrderSubmissionProps> = ({
   const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
   const [manufacturersLoading, setManufacturersLoading] = useState(true);
   const [manufacturersError, setManufacturersError] = useState<string>('');
-  const [selectedManufacturer, setSelectedManufacturer] = useState<string>('');
+  const [selectedManufacturer, setSelectedManufacturer] = useState<string>('roge');
   const [quantity, setQuantity] = useState<number>(1);
   const [notes, setNotes] = useState<string>('');
   const [loading, setLoading] = useState(false);
@@ -165,7 +165,7 @@ export const OrderSubmission: React.FC<OrderSubmissionProps> = ({
 
       const orderData = {
         customer_id: user.id,
-        manufacturer_id: selectedManufacturer,
+        manufacturer_id: selectedManufacturer === 'roge' ? null : selectedManufacturer,
         design_data: {
           json: designJson,
           image: designImage,
@@ -201,7 +201,7 @@ export const OrderSubmission: React.FC<OrderSubmissionProps> = ({
 
       if (error) throw error;
 
-      toast.success('Order submitted successfully! Redirecting to your profile...');
+      toast.success('Order received! We will confirm details with you shortly.');
       onClose();
       navigate('/profile', { 
         state: { 
@@ -296,6 +296,12 @@ export const OrderSubmission: React.FC<OrderSubmissionProps> = ({
                   <SelectValue placeholder="Choose a manufacturer" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="roge">
+                    <div className="flex flex-col">
+                      <span className="font-medium">Roge Studio (recommended)</span>
+                      <span className="text-sm text-muted-foreground">Order from 1 piece • we produce and deliver</span>
+                    </div>
+                  </SelectItem>
                   {manufacturers.map((manufacturer) => (
                     <SelectItem key={manufacturer.id} value={manufacturer.id}>
                       <div className="flex flex-col">
