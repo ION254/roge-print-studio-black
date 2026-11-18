@@ -40,28 +40,32 @@ export const Templates: React.FC<TemplatesProps> = ({
     : templates.filter(t => t.category === selectedCategory);
 
   const TemplateCard = ({ template }: { template: Template }) => (
-    <div 
-      key={template.id} 
-      className="group cursor-pointer relative"
+    <button
+      type="button"
+      className="group text-left"
       onClick={() => handleTemplateClick(template)}
       title={template.name}
     >
-      <div className="w-24 h-24 relative overflow-hidden bg-muted rounded-md border border-border hover:border-primary/50 transition-colors">
-        <img 
-          src={template.thumbnail} 
+      <div className="aspect-square relative overflow-hidden bg-muted rounded-lg border border-border group-hover:border-primary transition-colors">
+        <img
+          src={template.thumbnail}
           alt={template.name}
-          className="object-cover w-full h-full transition-transform duration-200 group-hover:scale-105"
+          loading="lazy"
+          onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/placeholder.svg'; }}
+          className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
         />
         {template.popular && (
-          <Badge className="absolute -top-1 -right-1 bg-yellow-500 text-yellow-900 hover:bg-yellow-500 z-20 text-xs px-1 py-0 scale-75">
-            <Star className="w-2 h-2" />
+          <Badge className="absolute top-2 left-2 text-[10px] px-2 py-0.5">
+            <Star className="w-3 h-3 mr-1" /> Popular
           </Badge>
         )}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-          <span className="text-white text-xs font-medium">Use</span>
-        </div>
+        <span className="absolute inset-x-2 bottom-2 text-center bg-primary text-primary-foreground text-xs font-semibold rounded-full py-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          Customize
+        </span>
       </div>
-    </div>
+      <p className="mt-2 text-sm font-semibold leading-tight">{template.name}</p>
+      <p className="text-xs text-muted-foreground">{template.category}</p>
+    </button>
   );
 
   return (
@@ -90,7 +94,7 @@ export const Templates: React.FC<TemplatesProps> = ({
 
           <ScrollArea className="flex-1 px-3 relative z-0">
             <TabsContent value={selectedCategory} className="mt-0 relative">
-              <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-7 xl:grid-cols-9 gap-1 pb-4 relative z-0">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 pb-4 relative z-0">
                 {filteredTemplates.map((template) => (
                   <TemplateCard key={template.id} template={template} />
                 ))}

@@ -1,6 +1,9 @@
 
 import { useState } from 'react';
-import { Canvas as FabricCanvas, Group, Rect, FabricObject } from 'fabric';
+import { Canvas as FabricCanvas, Group, Rect, FabricObject, FabricImage } from 'fabric';
+import scrubsTemplate from '@/assets/template-scrubs.jpg';
+import jumpsuitTemplate from '@/assets/template-jumpsuit.jpg';
+import apronTemplate from '@/assets/template-apron.jpg';
 import { toast } from 'sonner';
 import tshirtBasicImage from '@/assets/template-tshirt-basic.jpg';
 import hoodieClassicImage from '@/assets/template-hoodie-classic.jpg';
@@ -229,7 +232,7 @@ const sampleTemplates: Template[] = [
     name: 'Hospital Scrubs',
     category: 'Uniforms',
     description: 'Professional medical scrubs with chest pocket area',
-    thumbnail: '/placeholder.svg',
+    thumbnail: scrubsTemplate,
     productType: 'scrubs',
     designAreas: [
       {
@@ -252,7 +255,7 @@ const sampleTemplates: Template[] = [
     name: 'Construction Jumpsuit',
     category: 'Workwear',
     description: 'High-visibility construction workwear with chest panel',
-    thumbnail: '/placeholder.svg',
+    thumbnail: jumpsuitTemplate,
     productType: 'jumpsuit',
     designAreas: [
       {
@@ -285,7 +288,7 @@ const sampleTemplates: Template[] = [
     name: 'Kitchen Apron',
     category: 'Aprons',
     description: 'Professional kitchen apron with center design area',
-    thumbnail: '/placeholder.svg',
+    thumbnail: apronTemplate,
     productType: 'apron',
     designAreas: [
       {
@@ -770,6 +773,25 @@ export const useTemplates = (
     fabricCanvas.centerObject(customMockup);
     customMockup.setCoords();
     fabricCanvas.setActiveObject(customMockup);
+
+    // Show the real product photo behind the design (single image = fast)
+    if (template.thumbnail && !template.thumbnail.endsWith('.svg')) {
+      const canvasRef = fabricCanvas;
+      FabricImage.fromURL(template.thumbnail, { crossOrigin: 'anonymous' }).then((img) => {
+        if (!canvasRef.getObjects().includes(customMockup)) return;
+        const cw = canvasRef.getWidth();
+        const ch = canvasRef.getHeight();
+        const scale = Math.min((cw * 0.85) / (img.width || 1), (ch * 0.85) / (img.height || 1));
+        img.set({ scaleX: scale, scaleY: scale, selectable: false, evented: false });
+        Object.assign(img, { name: 'product_photo', excludeFromExport: false });
+        canvasRef.remove(customMockup);
+        canvasRef.insertAt(0, img);
+        canvasRef.centerObject(img);
+        img.setCoords();
+        canvasRef.discardActiveObject();
+        canvasRef.requestRenderAll();
+      }).catch(() => {});
+    }
 
     // Add design area guides (dashed outlines)
     template.designAreas.forEach((area) => {
